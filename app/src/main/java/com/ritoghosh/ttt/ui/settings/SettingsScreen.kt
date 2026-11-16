@@ -1,8 +1,8 @@
 /**
- * SettingsScreen — pomodoro lengths (− value +), theme (system / light / dark) and backup (SPEC 9.5).
- * "Nothing else": report export arrives in M7.
+ * SettingsScreen — pomodoro lengths (− value +), theme (system / light / dark), backup and the
+ * report export (SPEC 9.5). "Nothing else."
  *
- * Depends on: SettingsViewModel, BackupSection, data/backup/RestoreService.kt, core/settings, ui/theme.
+ * Depends on: SettingsViewModel, BackupSection, ReportSection, data/backup/RestoreService.kt, core/settings, ui/theme.
  * Must not: hold settings itself; every change goes straight to SettingsRepository.
  */
 package com.ritoghosh.ttt.ui.settings
@@ -92,6 +92,8 @@ private fun SettingsContent(state: SettingsUiState, viewModel: SettingsViewModel
         }
         SectionHeader(stringResource(R.string.settings_backup))
         BackupSection(state, viewModel, restoreService)
+        SectionHeader(stringResource(R.string.settings_report))
+        ReportSection(state, viewModel)
     }
 }
 
@@ -99,6 +101,8 @@ private fun SettingsContent(state: SettingsUiState, viewModel: SettingsViewModel
 private fun messageText(message: SettingsMessage): String = when (message) {
     SettingsMessage.BACKUP_SAVED -> stringResource(R.string.backup_saved)
     SettingsMessage.BACKUP_FAILED -> stringResource(R.string.backup_failed)
+    SettingsMessage.REPORT_SAVED -> stringResource(R.string.report_saved)
+    SettingsMessage.REPORT_FAILED -> stringResource(R.string.report_failed)
 }
 
 @Composable
@@ -140,7 +144,11 @@ private fun ThemeRow(choice: ThemeChoice, selected: Boolean, onSelect: () -> Uni
         verticalAlignment = Alignment.CenterVertically,
     ) {
         RadioButton(selected = selected, onClick = null)
-        Text(themeLabel(choice), style = MaterialTheme.typography.bodyLarge, modifier = Modifier.padding(start = Spacing.s))
+        Text(
+            text = themeLabel(choice),
+            style = MaterialTheme.typography.bodyLarge,
+            modifier = Modifier.padding(start = Spacing.s),
+        )
     }
 }
 

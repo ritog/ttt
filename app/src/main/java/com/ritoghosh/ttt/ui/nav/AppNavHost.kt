@@ -113,7 +113,12 @@ fun AppNavHost(
         composable(Destination.Settings.route) {
             SettingsRoute(
                 viewModel {
-                    SettingsViewModel(container.settingsRepository, container.backupService, container.clock)
+                    SettingsViewModel(
+                        container.settingsRepository,
+                        container.backupService,
+                        container.reportService,
+                        container.clock,
+                    )
                 },
                 container.restoreService,
             )

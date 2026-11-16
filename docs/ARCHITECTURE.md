@@ -25,7 +25,7 @@ Because `:core` has no Android plugin, Android classes cannot be imported there;
 - `MainActivity` reads the container and shows `AppNav`.
 - `AppNav` is the frame: hamburger drawer (Log, Settings, About), top bar, bottom tabs (Todo, Plan, Track), and a `NavHost` with string routes listed in `ui/nav/Destination.kt`.
 
-## Folder map (current, M6)
+## Folder map (current, M7)
 
 ```
 core/src/main/kotlin/com/ritoghosh/ttt/core/
@@ -37,6 +37,8 @@ core/src/main/kotlin/com/ritoghosh/ttt/core/
   stats/                     EntryBlockMatcher (plan vs actual), WorkedTime, TagTotals
   settings/Settings.kt       setting keys, ranges, parsing with safe fallbacks
   backup/BackupRules.kt      backup file names, which old backups to delete, when an auto-backup is due
+  report/                    ReportBuilder (+ ReportContext, SummarySheet, PlanSheets, ActivitySheets),
+                             ReportTable, ReportRange, ReportWriter, XlsxWriter (+ XlsxSheet, XlsxText)
 core/src/test/kotlin/...     unit tests; testing/TestTime.kt has FakeClock and time helpers
 app/src/main/java/com/ritoghosh/ttt/
   TttApplication.kt          owns the AppContainer; installs a pending restore before the database opens
@@ -47,6 +49,7 @@ app/src/main/java/com/ritoghosh/ttt/
   data/alarm/                PhaseAlarmScheduler, PhaseAlarmReceiver, Notifications (TimerNotifications)
   data/backup/               BackupService (VACUUM INTO snapshot), RestoreService (+ installPendingRestore),
                              AutoBackup (folder backups when the app is left)
+  data/report/               ReportService (load everything, build, write the .xlsx)
   ui/theme/                  Color, Type, Spacing, Theme, TagColors (all styling tokens)
   ui/nav/                    Destination, AppNav (frame), AppNavHost (routes + ViewModel factories),
                              AppBars, AppDrawer, TagFilterHolder, ScreenRequests
@@ -59,7 +62,7 @@ app/src/main/java/com/ritoghosh/ttt/
   ui/track/                  TrackScreen, TrackViewModel, TrackUiState, TimerFace (+ buttons),
                              TrackParts (note card, today row, hints), TrackDialogs
   ui/log/                    LogScreen, LogViewModel, LogUiState, LogDialogs
-  ui/settings/               SettingsScreen, SettingsViewModel, BackupSection
+  ui/settings/               SettingsScreen, SettingsViewModel, BackupSection, ReportSection (+ range dialog)
   ui/about/AboutScreen.kt
 app/schemas/                 Room's exported schema, one JSON per version (commit these)
 ```
@@ -79,4 +82,4 @@ Filled in as they are built:
 - **Global tag filter**: `TagFilterHolder` (activity-scoped ViewModel) holds the selected tag; each screen's ViewModel combines it with its data.
 - **Run a pomodoro** (M4): a button in `TrackScreen` → `TrackViewModel` sends a `TimerEvent` → `TimerRepository.dispatch` reads `timer_state`, calls `transition()` in `PomodoroMachine` (pure, core), and in **one transaction** saves any finished session to `entry` and the new state (with the note-prompt id). After the transaction it applies the `AlarmAction` (`PhaseAlarmScheduler`) and redraws the ongoing notification (`TimerNotifications`, a system chronometer, no service). The Room `Flow` of `timer_state` updates the screen; a 1-second tick (only while visible) moves the clock.
 - **Planned end** (M4): the alarm fires `PhaseAlarmReceiver` → `TimerRepository.onPlannedEndAlarm`: a break ends (Evaluate) and "Break over" is posted; work continues as overtime and "Planned time reached" is posted. On every app open `MainActivity.onStart` calls `recoverOnAppStart` (Evaluate + re-schedule a lost alarm).
-- **Export a report** (M7): Settings → `ReportBuilder` (core) → `XlsxWriter` (core) → system save dialog.
+- **Export a report** (M7): Settings → "Export report" → `ReportSection` asks for a range (All time / This month / Custom) → the system "Save as" picker → `SettingsViewModel.onReportDestinationChosen` → `ReportService` reads every task, block and session in one transaction → `buildReport` (core) makes six `ReportTable`s → `XlsxWriter` (core, `java.util.zip` only) writes them to the chosen document.

@@ -35,6 +35,10 @@ interface TaskDao {
     @Query(TASKS_WITH_TAG_NAMES)
     fun observeAll(): Flow<List<TaskWithTagNames>>
 
+    /** Every task, once (for the report). */
+    @Query(TASKS_WITH_TAG_NAMES)
+    suspend fun getAll(): List<TaskWithTagNames>
+
     @Query(TASKS_WITH_TAG_NAMES + " WHERE task.id = :taskId")
     suspend fun getById(taskId: Long): TaskWithTagNames?
 
@@ -101,6 +105,10 @@ private const val BLOCKS_OVERLAPPING =
 @Dao
 interface BlockDao {
 
+    /** Every block, once (for the report). */
+    @Query("SELECT * FROM block ORDER BY start_at")
+    suspend fun getAll(): List<BlockEntity>
+
     @Query(BLOCKS_OVERLAPPING)
     fun observeOverlapping(startMs: Long, endMs: Long): Flow<List<BlockEntity>>
 
@@ -129,6 +137,10 @@ interface BlockDao {
 
 @Dao
 interface EntryDao {
+
+    /** Every session, once (for the report). */
+    @Query("SELECT * FROM entry ORDER BY started_at")
+    suspend fun getAll(): List<EntryEntity>
 
     @Insert
     suspend fun insert(entry: EntryEntity): Long

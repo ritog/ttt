@@ -43,4 +43,13 @@ class ConstantsTest {
         assertEquals(60, LONG_OVERTIME_MINUTES)
         assertEquals(24, AUTO_BACKUP_INTERVAL_HOURS)
     }
+
+    @Test
+    fun `report limits match the spec`() {
+        assertEquals(5, REPORT_TOP_COUNT)
+        assertEquals(7, REPORT_SHORT_WINDOW_DAYS)
+        assertEquals(30, REPORT_LONG_WINDOW_DAYS)
+        assertEquals(32_000, REPORT_CELL_MAX_LENGTH)
+        assertEquals(31, REPORT_SHEET_NAME_MAX_LENGTH)
+    }
 }

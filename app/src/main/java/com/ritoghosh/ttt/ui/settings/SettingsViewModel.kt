@@ -1,8 +1,9 @@
 /**
- * SettingsViewModel — pomodoro lengths, theme, and backup: back up now, auto-backup folder and
- * how many to keep (SPEC 8, 9.5). Restore is the shared RestoreBackupLauncher; report export joins in M7.
+ * SettingsViewModel — pomodoro lengths, theme, backup (back up now, auto-backup folder, how many
+ * to keep) and the report export (SPEC 8, 9.5, 11). Restore is the shared RestoreBackupLauncher.
  *
- * Depends on: data/repo/SettingsRepository.kt, data/backup/BackupService.kt, core/settings, core/time.
+ * Depends on: data/repo/SettingsRepository.kt, data/backup/BackupService.kt, data/report/ReportService.kt,
+ * core/settings, core/report, core/time.
  * Must not: hold a Context. Folder permissions are taken and released by the screen.
  * Changes are saved at once; there is no Save button.
  */
@@ -12,6 +13,7 @@ import android.net.Uri
 import android.provider.DocumentsContract
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.ritoghosh.ttt.core.report.ReportRange
 import com.ritoghosh.ttt.core.settings.AUTO_BACKUP_FOLDER_URI_KEY
 import com.ritoghosh.ttt.core.settings.LAST_AUTO_BACKUP_AT_KEY
 import com.ritoghosh.ttt.core.settings.NumberSetting
@@ -20,18 +22,21 @@ import com.ritoghosh.ttt.core.time.Clock
 import com.ritoghosh.ttt.data.backup.BackupResult
 import com.ritoghosh.ttt.data.backup.BackupService
 import com.ritoghosh.ttt.data.repo.SettingsRepository
+import com.ritoghosh.ttt.data.report.ReportResult
+import com.ritoghosh.ttt.data.report.ReportService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 import java.time.ZoneId
 import java.time.ZoneOffset
 
 private const val STOP_TIMEOUT_MS = 5_000L
 
-enum class SettingsMessage { BACKUP_SAVED, BACKUP_FAILED }
+enum class SettingsMessage { BACKUP_SAVED, BACKUP_FAILED, REPORT_SAVED, REPORT_FAILED }
 
 data class SettingsUiState(
     val isLoaded: Boolean = false,
@@ -42,6 +47,8 @@ data class SettingsUiState(
     val lastAutoBackupAtMs: Long? = null,
     val zone: ZoneId = ZoneOffset.UTC,
     val message: SettingsMessage? = null,
+    /** True while a report is being written; the Export button waits. */
+    val isExportingReport: Boolean = false,
 ) {
     fun valueOf(setting: NumberSetting): Int = numbers[setting] ?: setting.default
 
@@ -56,12 +63,21 @@ data class SettingsUiState(
 class SettingsViewModel(
     private val settingsRepository: SettingsRepository,
     private val backupService: BackupService,
+    private val reportService: ReportService,
     private val clock: Clock,
 ) : ViewModel() {
 
     private val message = MutableStateFlow<SettingsMessage?>(null)
+    private val isExportingReport = MutableStateFlow(false)
 
-    val uiState: StateFlow<SettingsUiState> = combine(settingsRepository.observeValues(), message) { values, current ->
+    /** The range chosen in the dialog, kept while the "Save as" picker is open. */
+    private var pendingReportRange: ReportRange? = null
+
+    val uiState: StateFlow<SettingsUiState> = combine(
+        settingsRepository.observeValues(),
+        message,
+        isExportingReport,
+    ) { values, current, exporting ->
         SettingsUiState(
             isLoaded = true,
             numbers = NumberSetting.entries.associateWith { it.readFrom(values) },
@@ -70,6 +86,7 @@ class SettingsViewModel(
             lastAutoBackupAtMs = values[LAST_AUTO_BACKUP_AT_KEY]?.toLongOrNull(),
             zone = clock.zone(),
             message = current,
+            isExportingReport = exporting,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), SettingsUiState())
 
@@ -102,6 +119,29 @@ class SettingsViewModel(
     /** The screen releases the folder permission; here the setting (and last backup time) go. */
     fun onStopAutoBackup() {
         viewModelScope.launch { settingsRepository.setAutoBackupFolder(null) }
+    }
+
+    /** Today, for the report dialog's "This month" and its custom-range defaults. */
+    fun today(): LocalDate = reportService.today()
+
+    fun suggestedReportFileName(): String = reportService.suggestedFileName()
+
+    /** Step 1: the range from the dialog. The screen then opens the "Save as" picker. */
+    fun onReportRangeChosen(range: ReportRange) {
+        pendingReportRange = range
+    }
+
+    /** Step 2: where to save. Builds and writes the report. */
+    fun onReportDestinationChosen(destination: Uri) {
+        val range = pendingReportRange ?: ReportRange.AllTime
+        pendingReportRange = null
+        isExportingReport.value = true
+        viewModelScope.launch {
+            val result = reportService.writeReportTo(destination, range)
+            isExportingReport.value = false
+            val saved = result == ReportResult.SAVED
+            message.value = if (saved) SettingsMessage.REPORT_SAVED else SettingsMessage.REPORT_FAILED
+        }
     }
 
     fun onMessageShown() {

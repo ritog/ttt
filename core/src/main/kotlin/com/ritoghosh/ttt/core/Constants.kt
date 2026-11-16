@@ -51,3 +51,16 @@ const val AUTO_BACKUP_INTERVAL_HOURS = 24
 
 /** How many auto-backups are kept in the chosen folder by default (SPEC 8.4). */
 const val DEFAULT_AUTO_BACKUP_KEEP = 7
+
+/** The Summary sheet lists this many top tags and top tasks (SPEC 11.2). */
+const val REPORT_TOP_COUNT = 5
+
+/** The Tags sheet's "last N days" columns, counted back from the export time (SPEC 11.2). */
+const val REPORT_SHORT_WINDOW_DAYS = 7
+const val REPORT_LONG_WINDOW_DAYS = 30
+
+/** Longest text kept in one report cell; spreadsheet apps refuse more than 32,767 (SPEC 11.3). */
+const val REPORT_CELL_MAX_LENGTH = 32_000
+
+/** Longest sheet name an xlsx file allows (SPEC 11.3). */
+const val REPORT_SHEET_NAME_MAX_LENGTH = 31

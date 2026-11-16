@@ -1,7 +1,7 @@
 /**
  * AppContainer — builds and holds the app's long-lived objects; the whole wiring in one place (SPEC 4.4).
  *
- * Depends on: BuildConfig, core/time, data/db, data/repo, data/alarm, data/backup.
+ * Depends on: BuildConfig, core/time, data/db, data/repo, data/alarm, data/backup, data/report.
  * Must not: use reflection or annotation-based injection, or hold any Activity or UI object
  * (only the application context, which lives as long as the process).
  *
@@ -15,6 +15,7 @@
  *   M4  TimerRepository, PhaseAlarmScheduler, TimerNotifications, EntryRepository (done)
  *   M5  SettingsRepository (done)
  *   M6  BackupService, RestoreService, AutoBackup (done)
+ *   M7  ReportService (done)
  */
 package com.ritoghosh.ttt
 
@@ -32,6 +33,7 @@ import com.ritoghosh.ttt.data.repo.EntryRepository
 import com.ritoghosh.ttt.data.repo.SettingsRepository
 import com.ritoghosh.ttt.data.repo.TaskRepository
 import com.ritoghosh.ttt.data.repo.TimerRepository
+import com.ritoghosh.ttt.data.report.ReportService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -71,4 +73,6 @@ class AppContainer(context: Context) {
     val restoreService = RestoreService(appContext, database)
 
     val autoBackup = AutoBackup(appContext, backupService, settingsRepository, clock, appScope)
+
+    val reportService = ReportService(appContext, database, clock)
 }

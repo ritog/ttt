@@ -133,6 +133,23 @@ Dated log of decisions the spec left open (date, decision, why). Newest at the b
 - **2026-11-16 — The "Backup restored" message is shown after the restart** (a flag set by TttApplication), because a toast shown just before the process exits may never appear.
 - **2026-11-16 — Backups use the MIME type `application/octet-stream`** so providers keep the `.db` name as given.
 
+## M7 — Report export
+
+- **2026-11-16 — Records belong to the range by their start**, as in the Log: a session from 23:50 to 00:20 on the last day of the range is in; one starting at 23:50 the day before is out.
+- **2026-11-16 — Session plan status is matched over all records**, not only the range, so a session just inside the range that continued a block just outside it is still "Continued after block".
+- **2026-11-16 — Minutes are rounded down, hours half up to one decimal.** Rounding down matches the app's screens, so the Log and the report never disagree by a minute. Differences are taken between the rounded minute cells, so every row adds up as shown.
+- **2026-11-16 — Summary "Range" row says "All time" or "Selected days", followed by From/To as real dates.** Core only sees dates, so "This month" appears as its first and last day.
+- **2026-11-16 — The report is in English, weekday names included** ("Mon"), like the rest of the app, so it does not change with the phone's language.
+- **2026-11-16 — Tags sheet has a "(no tag)" row** when any task has no tags, as in the Log; it is always last. Summary's top tags leave it out.
+- **2026-11-16 — Summary's top tasks and tags list only those with tracked time**; with none, the table says "None yet".
+- **2026-11-16 — Tasks sheet order: open tasks oldest first, then done tasks most recently done first.** "First worked" and "Last worked" are the start dates of the first and last sessions.
+- **2026-11-16 — Daily counts a day with a completed task as activity**, even with no session or block that day.
+- **2026-11-16 — "Last 7 / 30 days" are rolling 24-hour periods back from the export time**, not calendar days.
+- **2026-11-16 — Save picker only, no share sheet** (same as backup in M6). The file can be shared from Files or Drive afterwards.
+- **2026-11-16 — The writer adds the hidden `_xlnm._FilterDatabase` name** for each data sheet, which Excel and LibreOffice use to show the autofilter, and writes numbers without exponent notation.
+- **2026-11-16 — Report numbers live in Constants.kt** (top 5, 7 and 30 days, 32,000-character cells, 31-character sheet names).
+- **2026-11-16 — Core was checked here by compiling with Gradle's bundled Kotlin 2.0.21 and running all 154 JVM tests; a sample export was read back with openpyxl** (dates, times, number formats, bold header, frozen pane, autofilter all as intended). The LibreOffice and Google Sheets check is in the manual checklist.
+
 ## Open questions
 
 - Licence (MIT or GPL-3.0): decide before the first release.

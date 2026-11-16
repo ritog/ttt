@@ -43,7 +43,12 @@ Never use `fallbackToDestructiveMigration`: it deletes the user's data.
 
 ## Add a sheet to the report
 
-Written in M7.
+1. Write a function in `core/report/` that returns a `ReportTable`: a title (at most 31 characters), a header and rows of `Cell`s (`Text`, `Number`, `Date`, `Time`, `DateTime`, `Empty`). Use the helpers in `ReportContext.kt` (`minutesCell`, `hoursCell`, `dateCell`, …) so rounding stays at the edge, and read records from `ReportContext` (`entriesInRange`, `blocksInRange`, `matches`, …) rather than filtering again.
+2. Add it to the list in `buildReport` (`ReportBuilder.kt`); sheet order in the file is list order.
+3. Add a test in `ReportBuilderTest` with rows written out from the fixture in `ReportFixture.kt`.
+4. Describe the sheet in `DATA.md` ("Report") and note the change in `DECISIONS.md`.
+
+The writer needs no change: any `ReportTable` becomes a sheet. To add a column, add it to the header list and to the row function in the same position.
 
 ## Add a screen to the menu
 
@@ -94,4 +99,8 @@ Tick before each release (full list grows with each milestone).
 - [ ] Auto-backup: choose a folder; leave the app (Home) → a backup appears in the folder; leave again at once → no second file (24 h rule); "Last auto-backup" shows the time.
 - [ ] Auto-backup pruning: set Keep last to 2, put three older `ttt-backup-…` files in the folder (copies with earlier dates in the name) plus an unrelated file → after the next auto-backup only the newest two backups remain and the unrelated file is untouched.
 - [ ] Stop auto-backup: the folder line says Off; the app no longer appears under the folder's access list in the Files app.
-- [ ] Report opens in LibreOffice and Google Sheets (M7).
+- [ ] Settings → Export report → All time → save: "Report saved."; the file is named `ttt-report-YYYY-MM-DD.xlsx`.
+- [ ] The report opens in LibreOffice Calc and in Google Sheets (upload to Drive, open with Sheets): six sheets in the order Summary, Tasks, Blocks, Sessions, Daily, Tags.
+- [ ] In both: dates show as `yyyy-mm-dd` and times as `hh:mm` and sort as dates; minutes are numbers that SUM correctly; the header row is bold and stays put when scrolling; the filter arrows work.
+- [ ] Summary states the range and the generation time; "This month" and a Custom range give smaller numbers than All time; a Custom range with the end before the start cannot be exported.
+- [ ] A task note with `<`, `&`, quotes, an emoji and a line break shows unchanged in the Tasks sheet.

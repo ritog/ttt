@@ -129,6 +129,17 @@ A backup is the whole database in one ordinary SQLite 3 file. Nothing is convert
 - **What restore resets:** `timer_state` is emptied (reads as idle), and `auto_backup_folder_uri` and `last_auto_backup_at` are removed, because a running timer and a folder permission belong to the old phone. Everything else, including the other settings and `meta`, is kept.
 - **How restore is installed:** the checked copy waits in the app's databases folder as `pending-restore.db`; the app restarts and, before anything opens the database, renames it over `ttt.db`. If the rename fails, the current database stays and the user still has the original backup file.
 
+## Report (export)
+
+Settings → Export report writes one `.xlsx` file (`ttt-report-YYYY-MM-DD.xlsx`) with six sheets: Summary, Tasks, Blocks, Sessions, Daily, Tags. It is read-only and one-way; nothing imports it back. No ids appear anywhere.
+
+- **Range:** All time, This month, or Custom (whole local days, both ends included). A session or block is in the range if it **starts** in it, the same rule the Log uses.
+- **What uses the range:** tracked and planned time, sessions, top tags and tasks (Summary); counts and minutes (Tasks); the rows of Blocks, Sessions and Daily; minutes worked (Tags).
+- **What does not:** task counts, "upcoming" planned time (blocks starting after the export time), this week vs last week (Summary); created, done, first/last worked and next block (Tasks); the last-7 and last-30-day columns (Tags, counted back from the export time).
+- **Plan status** (Sessions) and "continued after end" (Blocks) are worked out over all records, so the range's edges never change how a session is classified. See "Plan vs actual" above.
+- **Rounding:** all sums are done in milliseconds. Minutes are whole and rounded down, as on the app's screens; hours have one decimal, rounded half up. A "Difference" column is the difference of the two minute cells in the same row.
+- **Cells:** dates, times and date-times are real spreadsheet values (`yyyy-mm-dd`, `hh:mm`), minutes are plain numbers, tags are comma-separated text. Times are shown in the phone's time zone at export time. Text cells are cut at 32,000 characters.
+
 ## Inspecting a backup on Linux
 
 ```sh
