@@ -44,7 +44,7 @@ A tag row exists only while at least one task uses it; the app deletes unused ta
 
 Primary key: (task_id, tag_id). Index on tag_id.
 
-### block — planned time for a task (used from M3)
+### block — planned time for a task
 
 | column | type | meaning |
 |---|---|---|
@@ -55,7 +55,7 @@ Primary key: (task_id, tag_id). Index on tag_id.
 
 Indexes: start_at, task_id. Blocks never overlap (checked in code, `BlockRules`).
 
-### entry — one recorded work session (used from M4)
+### entry — one recorded work session
 
 | column | type | meaning |
 |---|---|---|
@@ -68,7 +68,7 @@ Indexes: start_at, task_id. Blocks never overlap (checked in code, `BlockRules`)
 
 Worked time = `ended_at − started_at − paused_ms`. Indexes: started_at, task_id.
 
-### timer_state — the pomodoro timer (one row, id = 1; used from M4)
+### timer_state — the pomodoro timer (one row, id = 1)
 
 | column | meaning |
 |---|---|
@@ -84,7 +84,7 @@ Worked time = `ended_at − started_at − paused_ms`. Indexes: started_at, task
 | completed_work_phases | work phases finished in the current run of pomodoros |
 | note_prompt_entry_id | session waiting for its note card, or empty |
 
-If the row is missing, the timer is idle.
+If the row is missing, the timer is idle. If phase or status hold text the app does not know (a damaged or hand-edited file), the app also treats the timer as idle rather than failing to start. Time is never stored as a running counter: elapsed time is always worked out from these timestamps, which is why the timer stays right after the app is killed or the phone sleeps.
 
 ### setting — app settings (used from M5)
 

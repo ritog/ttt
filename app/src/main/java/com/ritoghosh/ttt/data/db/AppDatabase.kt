@@ -33,6 +33,12 @@ abstract class AppDatabase : RoomDatabase() {
 
     abstract fun tagDao(): TagDao
 
+    abstract fun blockDao(): BlockDao
+
+    abstract fun entryDao(): EntryDao
+
+    abstract fun timerStateDao(): TimerStateDao
+
     companion object {
         const val FILE_NAME = "ttt.db"
 

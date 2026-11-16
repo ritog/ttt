@@ -5,7 +5,7 @@
  * Must not: change data itself; it reports taps.
  *
  * Done state is shown by the checkbox and a strike-through, never by colour alone (SPEC 15.2).
- * The secondary line ("Next block…", "2h 15m worked") arrives with blocks and sessions (M3/M5).
+ * The quiet secondary line shows "Next block Sat 14:00" now; "2h 15m worked" joins in M5.
  */
 package com.ritoghosh.ttt.ui.todo
 
@@ -34,6 +34,7 @@ import com.ritoghosh.ttt.ui.theme.Spacing
 @Composable
 fun TaskRow(
     task: Task,
+    secondaryText: String?,
     onCheckedChange: (Boolean) -> Unit,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -63,6 +64,13 @@ fun TaskRow(
                     MaterialTheme.colorScheme.onSurface
                 },
             )
+            if (secondaryText != null) {
+                Text(
+                    text = secondaryText,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
             if (task.tags.isNotEmpty()) {
                 FlowRow(
                     horizontalArrangement = Arrangement.spacedBy(Spacing.xs),

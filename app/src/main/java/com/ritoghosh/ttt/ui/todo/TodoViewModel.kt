@@ -1,7 +1,7 @@
 /**
  * TodoViewModel — the Todo list: quick add, check/uncheck, tag filter, Done section, messages.
  *
- * Depends on: data/repo/TaskRepository.kt, ui/nav/TagFilterHolder.kt, TodoUiState.kt.
+ * Depends on: data/repo (TaskRepository, BlockRepository), core/time/Clock.kt, ui/nav/TagFilterHolder.kt.
  * Must not: touch the database directly or hold Android Context. The task editor sheet has
  * its own TaskEditorViewModel.
  */
@@ -12,7 +12,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.ritoghosh.ttt.core.time.Clock
 import com.ritoghosh.ttt.data.repo.AddTaskResult
+import com.ritoghosh.ttt.data.repo.BlockRepository
 import com.ritoghosh.ttt.data.repo.TaskRepository
 import com.ritoghosh.ttt.ui.nav.TagFilterHolder
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -28,6 +30,8 @@ private const val STOP_TIMEOUT_MS = 5_000L
 
 class TodoViewModel(
     private val repository: TaskRepository,
+    blockRepository: BlockRepository,
+    private val clock: Clock,
     private val tagFilter: TagFilterHolder,
 ) : ViewModel() {
 
@@ -41,14 +45,20 @@ class TodoViewModel(
     private val isDoneExpanded = MutableStateFlow(false)
     private val message = MutableStateFlow<TodoMessage?>(null)
 
-    val uiState: StateFlow<TodoUiState> = combine(
+    /** Tasks plus each task's next block. "Now" is fixed when the screen opens (see BlockRepository). */
+    private val tasksAndNextBlocks = combine(
         repository.observeTasks(),
+        blockRepository.observeNextBlockStarts(clock.nowMs()),
+    ) { tasks, nextStarts -> tasks to nextStarts }
+
+    val uiState: StateFlow<TodoUiState> = combine(
+        tasksAndNextBlocks,
         repository.observeTagNames(),
         tagFilter.selectedTag,
         isDoneExpanded,
         message,
-    ) { tasks, tags, selectedTag, doneExpanded, currentMessage ->
-        buildTodoUiState(tasks, tags, selectedTag, doneExpanded, currentMessage)
+    ) { (tasks, nextStarts), tags, selectedTag, doneExpanded, currentMessage ->
+        buildTodoUiState(tasks, tags, selectedTag, doneExpanded, currentMessage, nextStarts, clock.zone())
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), TodoUiState())
 
     fun onAddTextChange(text: String) {

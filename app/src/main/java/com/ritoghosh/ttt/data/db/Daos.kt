@@ -83,3 +83,71 @@ interface TagDao {
     @Query("DELETE FROM tag WHERE id NOT IN (SELECT tag_id FROM task_tag)")
     suspend fun deleteUnused()
 }
+
+/** The earliest upcoming block start of one task. */
+data class NextBlockStart(
+    val taskId: Long,
+    val startAt: Long,
+)
+
+/** Blocks that overlap the half-open window [startMs, endMs), earliest first. */
+private const val BLOCKS_OVERLAPPING =
+    "SELECT * FROM block WHERE start_at < :endMs AND end_at > :startMs ORDER BY start_at"
+
+@Dao
+interface BlockDao {
+
+    @Query(BLOCKS_OVERLAPPING)
+    fun observeOverlapping(startMs: Long, endMs: Long): Flow<List<BlockEntity>>
+
+    @Query(BLOCKS_OVERLAPPING)
+    suspend fun getOverlapping(startMs: Long, endMs: Long): List<BlockEntity>
+
+    @Query("SELECT * FROM block WHERE id = :blockId")
+    suspend fun getById(blockId: Long): BlockEntity?
+
+    @Insert
+    suspend fun insert(block: BlockEntity): Long
+
+    @Update
+    suspend fun update(block: BlockEntity)
+
+    @Query("DELETE FROM block WHERE id = :blockId")
+    suspend fun deleteById(blockId: Long)
+
+    /** For each task, its first block starting at or after [nowMs] (the Todo row's "Next block"). */
+    @Query(
+        "SELECT task_id AS taskId, MIN(start_at) AS startAt FROM block " +
+            "WHERE start_at >= :nowMs GROUP BY task_id",
+    )
+    fun observeNextStarts(nowMs: Long): Flow<List<NextBlockStart>>
+}
+
+@Dao
+interface EntryDao {
+
+    @Insert
+    suspend fun insert(entry: EntryEntity): Long
+
+    @Query("UPDATE entry SET note = :note WHERE id = :entryId")
+    suspend fun updateNote(entryId: Long, note: String)
+
+    /** Entries that START inside [startMs, endMs): a session belongs to the day it starts (SPEC 4.3). */
+    @Query("SELECT * FROM entry WHERE started_at >= :startMs AND started_at < :endMs ORDER BY started_at")
+    fun observeStartedIn(startMs: Long, endMs: Long): Flow<List<EntryEntity>>
+}
+
+/** The timer's single row; its id is always 1 (TIMER_STATE_ROW_ID). */
+@Dao
+interface TimerStateDao {
+
+    @Query("SELECT * FROM timer_state WHERE id = 1")
+    fun observe(): Flow<TimerStateEntity?>
+
+    @Query("SELECT * FROM timer_state WHERE id = 1")
+    suspend fun get(): TimerStateEntity?
+
+    /** Writes the row, creating it the first time. */
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun save(state: TimerStateEntity)
+}

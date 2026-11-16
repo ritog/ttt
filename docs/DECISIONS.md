@@ -65,6 +65,45 @@ Dated log of decisions the spec left open (date, decision, why). Newest at the b
 
 - **2026-11-16 — kotlinx-serialization-core raised to 1.9.0 with a Gradle `constraints` block.** First on-device run: all 8 repository tests passed, but `MigrationTest` crashed with `AbstractMethodError … typeParametersSerializers()`. Cause: Navigation brings serialization 1.7.x into the app, room-testing needs 1.8+, and AGP pins test dependencies to the app's versions. A constraint raises the floor without adding a new library.
 
+## M3 — Timeblock (Plan) screen
+
+- **2026-11-16 — Sessions column deferred to M5**, as the build order says; M3 draws only the blocks column.
+- **2026-11-16 — Timeline scale: 72 dp per hour (1.2 dp per minute).** A 15-minute block is 18 dp tall: readable, but under the 48 dp touch target. Tapping short blocks is fiddly; revisit in the M8 accessibility pass (e.g. a list view of the day).
+- **2026-11-16 — Blocks use a 6 dp corner radius, not 12 dp.** 12 dp makes short blocks look like pills.
+- **2026-11-16 — On today the timeline opens an hour before now; other days open at 08:00.**
+- **2026-11-16 — End time 00:00 means "midnight at the end of the day"** in the editor (BlockTimes). A block can end at midnight but can never end at the start of its own day, so there is no ambiguity.
+- **2026-11-16 — The time picker allows any minute; the editor rounds to the nearest 5 minutes** (never wrapping past 23:55). The stock Material time picker has no step setting.
+- **2026-11-16 — Changing the start keeps the block's length**, as calendars do. Duration chips set the end from the start and stop at midnight.
+- **2026-11-16 — New blocks start at the next 5-minute mark on today (latest 23:45), otherwise 09:00, and last 60 minutes.** Constants in core/Constants.kt.
+- **2026-11-16 — Deleting a block has no confirmation.** A block is cheap to re-create, and the spec says it can always be deleted.
+- **2026-11-16 — The task picker lists open tasks only, newest first, at most 6;** search matches title text or the start of a tag. "Create …" uses the quick-add rules, so `#tags` work there too. The block editor's picker ignores the global tag filter (SPEC 6.5 only asks that of Track).
+- **2026-11-16 — Times on screen are 24-hour ("14:05")**, matching the report's `hh:mm`. Following the phone's 12/24-hour setting can come later.
+- **2026-11-16 — "Schedule a block" passes the task through an activity-scoped `ScreenRequests`, not a navigation argument.** Tab navigation restores each tab's saved state, which would drop a fresh argument. The editor saves pending edits first.
+- **2026-11-16 — The Todo row's "Next block" line uses "now" from when the screen opened**, so a block that starts while the screen stays open is still shown until the screen is reopened. Cheap, and good enough for a hint.
+- **2026-11-16 — The overlap check reads only the candidate's own local day**, inside the save transaction; blocks never cross midnight, so no other day can clash.
+- **2026-11-16 — AppNav split into AppNav (the frame) and AppNavHost (routes and ViewModel factories)** to stay under the file-size rule.
+
+## M4 — Timer
+
+- **2026-11-16 — Exact alarms: declare `SCHEDULE_EXACT_ALARM`, not `USE_EXACT_ALARM`.** Current Android docs (differs from SPEC 10.1's wording, so recorded here per SPEC 0.6): on Android 14+ `SCHEDULE_EXACT_ALARM` is denied by default for new installs; `USE_EXACT_ALARM` is meant for alarm-clock and calendar apps. The app checks `canScheduleExactAlarms()`, uses `setExactAndAllowWhileIdle` when allowed and `setAndAllowWhileIdle` otherwise, and Track shows "The end alert may be a few minutes late" with an "Allow exact alarms" button.
+- **2026-11-16 — Any event first ends a break that has already run out** (as if Evaluate had been sent), then applies the event. A late tap never acts on a break that is really over; still no chaining.
+- **2026-11-16 — Going idle keeps the selected task** (timer_state.task_id) so Start is one tap next time; the long-break count and session fields reset as SPEC 7.3 says. Deleting that task is still allowed when idle (the "timer holds the task" check is status ≠ IDLE).
+- **2026-11-16 — The task selection lives in timer_state** (ChangeTask while idle or waiting), so it survives app restarts and there is one source of truth.
+- **2026-11-16 — The note prompt is kept through Start/Stop until saved or skipped;** a newer session replaces it. Skipping loses nothing.
+- **2026-11-16 — The machine cannot know the new entry's id, so TimerRepository sets note_prompt_entry_id** right after inserting the entry, in the same transaction.
+- **2026-11-16 — Evaluate on screen too:** when a break runs out while Track is visible, the screen sends Evaluate at once instead of waiting for the alarm (which may be late without exact alarms).
+- **2026-11-16 — Countdown text rounds up, overtime rounds down** (25:00 at start, 00:00 only at the real end; +00:00 at the planned end).
+- **2026-11-16 — Pause and Resume also work during breaks** (SPEC's Pause row is not limited to work).
+- **2026-11-16 — Paused during overtime: primary button is Finish, secondary Resume and Stop.** SPEC 9.3 lists the running-overtime case; this is the paused counterpart.
+- **2026-11-16 — The notification permission is requested on Start every time it is missing (Android 13+);** Android itself stops showing the prompt after two refusals. A quiet line on Track explains what notifications are for.
+- **2026-11-16 — Notification icon: the Track tab's timer vector**, reused (monochrome, as Android requires).
+- **2026-11-16 — Notification taps open MainActivity (launchMode singleTop) with an extra; AppNav switches to Track.** Simpler than deep links.
+- **2026-11-16 — Pomodoro lengths are the defaults (25/5/15, 4) until Settings arrive in M5.**
+- **2026-11-16 — "Today" on Track is fixed when the screen opens;** reopening after midnight starts the new day.
+- **2026-11-16 — Corrupted timer_state text reads as IDLE** instead of crashing at start.
+- **2026-11-16 — "Start timer" from a task or block selects the task on Track but does not start it** (SPEC 6.3: "opens the Track screen with that task selected").
+- **2026-11-16 — TrackViewModel is ~230 lines**, a little over the 200-line guideline; it is one screen's actions grouped by section. Split if it grows in M5.
+
 ## Open questions
 
 - Licence (MIT or GPL-3.0): decide before the first release.

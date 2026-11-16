@@ -8,6 +8,8 @@ package com.ritoghosh.ttt.ui.todo
 
 import com.ritoghosh.ttt.core.model.Task
 import com.ritoghosh.ttt.core.model.TitleError
+import java.time.ZoneId
+import java.time.ZoneOffset
 
 /** A one-time message for the snackbar. Turned into text by the screen (no resources here). */
 sealed interface TodoMessage {
@@ -31,6 +33,10 @@ data class TodoUiState(
     /** The Done section is collapsed by default (SPEC 9.1). */
     val isDoneExpanded: Boolean = false,
     val message: TodoMessage? = null,
+    /** Task id → start of its next block (for the row's "Next block Sat 14:00" line). */
+    val nextBlockStarts: Map<Long, Long> = emptyMap(),
+    /** Zone for formatting those times (from the Clock). */
+    val zone: ZoneId = ZoneOffset.UTC,
 )
 
 /**
@@ -43,6 +49,8 @@ fun buildTodoUiState(
     selectedTag: String?,
     isDoneExpanded: Boolean,
     message: TodoMessage?,
+    nextBlockStarts: Map<Long, Long> = emptyMap(),
+    zone: ZoneId = ZoneOffset.UTC,
 ): TodoUiState {
     val activeTag = selectedTag?.takeIf { it in tags }
     val visible = if (activeTag == null) tasks else tasks.filter { activeTag in it.tags }
@@ -55,5 +63,7 @@ fun buildTodoUiState(
         activeTag = activeTag,
         isDoneExpanded = isDoneExpanded,
         message = message,
+        nextBlockStarts = nextBlockStarts,
+        zone = zone,
     )
 }

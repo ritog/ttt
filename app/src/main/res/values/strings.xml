@@ -18,10 +18,11 @@
     <string name="cd_add_tag">Add tag</string>
     <string name="cd_remove_tag">Remove tag %1$s</string>
     <string name="cd_clear_filter">Clear tag filter</string>
+    <string name="cd_previous_day">Previous day</string>
+    <string name="cd_next_day">Next day</string>
+    <string name="cd_add_block">Add a block</string>
 
-    <!-- Placeholder lines until each screen is built (M3–M5) -->
-    <string name="placeholder_plan">Your day plan will appear here.</string>
-    <string name="placeholder_track">The timer will appear here.</string>
+    <!-- Placeholder lines until each screen is built (M5) -->
     <string name="placeholder_log">Your past sessions will appear here.</string>
     <string name="placeholder_settings">Settings will appear here.</string>
 
@@ -32,6 +33,7 @@
     <string name="todo_done_header">Done (%1$d)</string>
     <string name="todo_filter_clear">Clear</string>
     <string name="todo_rejected_tags">Kept in the title, not valid tags: %1$s</string>
+    <string name="todo_next_block">Next block %1$s</string>
 
     <!-- Task editor -->
     <string name="editor_title_label">Title</string>
@@ -41,6 +43,8 @@
     <string name="editor_cancel">Cancel</string>
     <string name="editor_delete">Delete task</string>
     <string name="editor_mark_done">Mark done</string>
+    <string name="editor_schedule_block">Schedule a block</string>
+    <string name="editor_start_timer">Start timer</string>
     <string name="editor_has_sessions">This task has sessions, so it can’t be deleted.</string>
     <string name="editor_stop_timer_first">Stop the timer first.</string>
     <string name="delete_dialog_title">Delete this task?</string>
@@ -51,12 +55,73 @@
     </plurals>
     <string name="delete_dialog_confirm">Delete</string>
 
+    <!-- Timeblock (Plan) screen and block editor -->
+    <string name="plan_today">Today</string>
+    <string name="plan_empty_day">Nothing planned. Tap + to add a block.</string>
+    <string name="block_task_label">Task</string>
+    <string name="block_task_hint">Search or create a task…</string>
+    <string name="block_task_change">Change</string>
+    <string name="block_task_create">Create “%1$s”</string>
+    <string name="block_date_label">Date</string>
+    <string name="block_start_label">Start</string>
+    <string name="block_end_label">End</string>
+    <string name="block_duration_chip">%1$d min</string>
+    <string name="block_save">Save</string>
+    <string name="block_delete">Delete block</string>
+    <string name="dialog_ok">OK</string>
+
+    <!-- Track (timer) -->
+    <string name="timer_start">Start</string>
+    <string name="timer_pause">Pause</string>
+    <string name="timer_resume">Resume</string>
+    <string name="timer_finish">Finish</string>
+    <string name="timer_stop">Stop</string>
+    <string name="timer_skip_break">Skip break</string>
+    <string name="timer_start_work">Start work</string>
+    <string name="timer_start_break">Start break</string>
+    <string name="timer_phase_work">Work</string>
+    <string name="timer_phase_short_break">Short break</string>
+    <string name="timer_phase_long_break">Long break</string>
+    <string name="timer_phase_paused">%1$s · paused</string>
+    <string name="timer_next">Next: %1$s</string>
+    <string name="timer_paused">Paused</string>
+    <string name="timer_overtime">Overtime</string>
+    <string name="timer_planned_today">Planned today %1$s</string>
+    <plurals name="timer_today">
+        <item quantity="one">Today: %1$d session · %2$s</item>
+        <item quantity="other">Today: %1$d sessions · %2$s</item>
+    </plurals>
+    <string name="timer_hint_notifications">Allow notifications to see the timer outside the app.</string>
+    <string name="timer_hint_exact_alarms">The end alert may be a few minutes late.</string>
+    <string name="timer_allow_exact_alarms">Allow exact alarms</string>
+    <string name="note_card_title">Note for this session</string>
+    <string name="note_card_save">Save</string>
+    <string name="note_card_skip">Skip</string>
+    <string name="overtime_title">You worked past the plan</string>
+    <string name="overtime_body">Keep all the time, or only the planned length?</string>
+    <string name="overtime_keep_all">Keep all %1$s</string>
+    <string name="overtime_keep_planned">Keep the planned %1$s only</string>
+    <string name="stop_title">Stop this session?</string>
+    <string name="stop_body">It will be saved with the time worked so far.</string>
+
+    <!-- Notifications -->
+    <string name="channel_alerts">Timer alerts</string>
+    <string name="channel_running">Running timer</string>
+    <string name="alert_break_over">Break over</string>
+    <string name="alert_planned_time_reached">Planned time reached: %1$s. Still tracking.</string>
+
     <!-- Validation messages -->
     <string name="error_title_empty">A task needs a title.</string>
     <string name="error_title_too_long">Titles can be up to 200 characters.</string>
     <string name="error_tag_empty">Type a tag first.</string>
     <string name="error_tag_too_long">Tags can be up to 30 characters.</string>
     <string name="error_tag_invalid">Tags use only a–z, 0–9, - and _.</string>
+    <string name="error_block_no_task">Pick or create a task first.</string>
+    <string name="error_block_end_before_start">End must be after start.</string>
+    <string name="error_block_grid">Use 5-minute steps.</string>
+    <string name="error_block_midnight">A block must end by midnight.</string>
+    <string name="error_block_too_short">Blocks are at least 15 minutes.</string>
+    <string name="error_block_overlap">Overlaps “%1$s”, %2$s.</string>
 
     <!-- About -->
     <string name="about_body">Time blocking, time tracking and to-do. Free and open source. No accounts, no ads, no network access.</string>

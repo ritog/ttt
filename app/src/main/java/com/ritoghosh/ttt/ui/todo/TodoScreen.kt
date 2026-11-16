@@ -34,13 +34,19 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ritoghosh.ttt.R
 import com.ritoghosh.ttt.ui.components.TagFilterRow
+import com.ritoghosh.ttt.ui.components.formatWeekdayTime
 import com.ritoghosh.ttt.ui.components.titleErrorText
 import com.ritoghosh.ttt.ui.theme.ListRowHeight
 import com.ritoghosh.ttt.ui.theme.Spacing
 
 /** Connects the ViewModels to the stateless screen and the editor sheet. */
 @Composable
-fun TodoRoute(todoViewModel: TodoViewModel, editorViewModel: TaskEditorViewModel) {
+fun TodoRoute(
+    todoViewModel: TodoViewModel,
+    editorViewModel: TaskEditorViewModel,
+    onScheduleBlock: (Long) -> Unit,
+    onStartTimer: (Long) -> Unit,
+) {
     val state by todoViewModel.uiState.collectAsStateWithLifecycle()
     val editor by editorViewModel.uiState.collectAsStateWithLifecycle()
     TodoScreen(
@@ -55,7 +61,14 @@ fun TodoRoute(todoViewModel: TodoViewModel, editorViewModel: TaskEditorViewModel
         onToggleDoneSection = todoViewModel::onToggleDoneSection,
         onMessageShown = todoViewModel::onMessageShown,
     )
-    editor?.let { TaskEditorSheet(state = it, viewModel = editorViewModel) }
+    editor?.let {
+        TaskEditorSheet(
+            state = it,
+            viewModel = editorViewModel,
+            onScheduleBlock = onScheduleBlock,
+            onStartTimer = onStartTimer,
+        )
+    }
 }
 
 @Composable
@@ -90,7 +103,12 @@ fun TodoScreen(
                 item(key = "empty") { QuietLine(stringResource(emptyMessageRes)) }
             }
             items(state.openTasks, key = { it.id }) { task ->
-                TaskRow(task, { onTaskCheckedChange(task.id, it) }, { onTaskClick(task.id) })
+                TaskRow(
+                    task = task,
+                    secondaryText = nextBlockText(state, task.id),
+                    onCheckedChange = { onTaskCheckedChange(task.id, it) },
+                    onClick = { onTaskClick(task.id) },
+                )
             }
             if (state.doneTasks.isNotEmpty()) {
                 item(key = "done-header") {
@@ -98,7 +116,7 @@ fun TodoScreen(
                 }
                 if (state.isDoneExpanded) {
                     items(state.doneTasks, key = { it.id }) { task ->
-                        TaskRow(task, { onTaskCheckedChange(task.id, it) }, { onTaskClick(task.id) })
+                        TaskRow(task, null, { onTaskCheckedChange(task.id, it) }, { onTaskClick(task.id) })
                     }
                 }
             }
@@ -147,6 +165,11 @@ private fun QuietLine(text: String) {
         modifier = Modifier.padding(horizontal = Spacing.l, vertical = Spacing.xl),
     )
 }
+
+/** "Next block Sat 14:00" for an open task with an upcoming block, else null. */
+@Composable
+private fun nextBlockText(state: TodoUiState, taskId: Long): String? =
+    state.nextBlockStarts[taskId]?.let { stringResource(R.string.todo_next_block, formatWeekdayTime(it, state.zone)) }
 
 /** The one-sentence empty state, or null when there is nothing to say (SPEC 9.1, 15.2). */
 private fun emptyTextRes(state: TodoUiState): Int? = when {

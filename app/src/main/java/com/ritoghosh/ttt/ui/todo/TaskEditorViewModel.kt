@@ -105,6 +105,20 @@ class TaskEditorViewModel(private val repository: TaskRepository) : ViewModel() 
         }
     }
 
+    /**
+     * "Schedule a block" and "Start timer": saves the edits, closes the sheet, then calls
+     * [handOver] with the task id so the other tab can take it from there.
+     */
+    fun saveThen(handOver: (Long) -> Unit) {
+        val taskId = state.value?.taskId ?: return
+        viewModelScope.launch {
+            if (saveEdits()) {
+                close()
+                handOver(taskId)
+            }
+        }
+    }
+
     fun onDeleteClicked() {
         updateOpen { if (it.deletion is TaskDeletion.Allowed) it.copy(isConfirmingDelete = true) else it }
     }

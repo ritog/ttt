@@ -25,6 +25,11 @@ class ConstantsTest {
     }
 
     @Test
+    fun `the suggested new block length is one of the chips`() {
+        assertEquals(true, DEFAULT_NEW_BLOCK_MINUTES in BLOCK_DURATION_CHIPS_MINUTES)
+    }
+
+    @Test
     fun `every block duration chip is a whole number of granularity steps`() {
         BLOCK_DURATION_CHIPS_MINUTES.forEach { chip ->
             assertEquals("chip $chip", 0, chip % BLOCK_GRANULARITY_MINUTES)

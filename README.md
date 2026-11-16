@@ -8,8 +8,8 @@ Time blocking, time tracking and to-do, in one small Android app.
 
 Free and open source. No accounts, no ads, no analytics, no network access.
 
-> Status: milestone **M2**. The Todo tab works end to end (tasks, tags, tag filter, editor, delete rules), stored in SQLite.
-> Timeblock, Track, Log and Settings are still placeholders.
+> Status: milestone **M4**. Todo, Timeblock and Track work end to end: tasks and tags, time blocks on a day timeline,
+> and a pomodoro timer that records sessions with notes. Log and Settings are still placeholders.
 > See `SPEC.md` section 18 for the build order.
 
 ## Screenshots

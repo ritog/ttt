@@ -16,7 +16,9 @@ Recipes for common changes, and the manual test checklist. Keep recipes short an
 
 ## Change a pomodoro default
 
-Written in M4/M5.
+1. Edit `DEFAULT_WORK_MINUTES`, `DEFAULT_SHORT_BREAK_MINUTES`, `DEFAULT_LONG_BREAK_MINUTES` or `DEFAULT_WORK_PHASES_BEFORE_LONG_BREAK` in `core/src/main/kotlin/com/ritoghosh/ttt/core/Constants.kt`.
+2. Update `ConstantsTest` if it pins the value, and SPEC 9.5.
+3. From M5 on, users' own settings override these defaults; changing a default affects only people who never changed that setting.
 
 ## Add a column (migration steps)
 
@@ -58,8 +60,25 @@ Tick before each release (full list grows with each milestone).
 - [ ] Editor: rename, add/remove tags, note; Save persists after an app restart; Cancel discards.
 - [ ] Editor: delete asks for confirmation; the last task with a tag removes that tag from the filter row.
 - [ ] About: the GitHub link opens github.com/ritog in the browser.
+- [ ] Timeblock: "+" opens the editor; a 60-minute block appears on the timeline, tinted by its task's first tag.
+- [ ] Timeblock: an overlapping block is refused with a message naming the other block; a 10-minute block is refused.
+- [ ] Timeblock: a block from 23:00 to 00:00 saves; 23:30 to 00:30 is refused ("must end by midnight").
+- [ ] Timeblock: tapping a block opens it for editing; Delete removes it; changes survive an app restart.
+- [ ] Timeblock: previous/next day and Today work; the current-time line shows only on today.
+- [ ] Timeblock: the tag filter hides blocks of other tasks.
+- [ ] Task editor: "Schedule a block" opens the Timeblock editor with that task chosen; the Todo row then shows "Next block …".
 - [ ] Light and dark themes look right (switch the phone's dark mode).
 - [ ] 200% font scale: nothing clipped.
 - [ ] TalkBack: hamburger and back buttons are announced.
-- [ ] Timer survives app kill, phone sleep and reboot (M4).
+- [ ] Track: pick a task, Start; the countdown runs; Pause/Resume; the ongoing notification counts down.
+- [ ] Track: at the planned end a "Planned time reached" alert arrives; the screen and notification count up "+mm:ss"; Finish queues a break that waits for a tap.
+- [ ] Track: a break ends by itself (alert "Break over"); the next work phase waits for a tap; Skip break works.
+- [ ] Track: Stop after ≥ 1 minute asks first; under a minute nothing is saved.
+- [ ] Track: after more than an hour of overtime, Finish/Stop asks "Keep all … / Keep the planned … only".
+- [ ] Track: the note card appears after a session; Save stores the note; Skip closes it.
+- [ ] Timer survives: kill the app (swipe away) mid-work → reopen → same time; lock the phone for a few minutes → correct; reboot mid-session → reopen → correct time, alarm re-scheduled.
+- [ ] First Start asks for notification permission (Android 13+); with it denied the timer still works.
+- [ ] Android 14+: with exact alarms not allowed, Track shows the hint; "Allow exact alarms" opens the system page.
+- [ ] Tapping a timer notification opens the Track tab.
+- [ ] "Start timer" from the task editor and from a block opens Track with that task selected.
 - [ ] Report opens in LibreOffice and Google Sheets (M7).

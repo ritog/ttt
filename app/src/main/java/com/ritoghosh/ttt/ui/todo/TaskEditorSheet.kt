@@ -4,7 +4,7 @@
  * Depends on: TaskEditorViewModel, TaskEditorDeleteDialog, ui/components, ui/theme.
  * Must not: decide anything; it shows TaskEditorUiState and forwards taps to the ViewModel.
  *
- * "Schedule a block" and "Start timer" are added with M3 and M4, when they can work.
+ * "Schedule a block" and "Start timer" save the edits first, then hand over to the other tab.
  */
 package com.ritoghosh.ttt.ui.todo
 
@@ -47,7 +47,12 @@ import com.ritoghosh.ttt.ui.theme.Spacing
 
 @OptIn(ExperimentalMaterial3Api::class) // ModalBottomSheet
 @Composable
-fun TaskEditorSheet(state: TaskEditorUiState, viewModel: TaskEditorViewModel) {
+fun TaskEditorSheet(
+    state: TaskEditorUiState,
+    viewModel: TaskEditorViewModel,
+    onScheduleBlock: (Long) -> Unit,
+    onStartTimer: (Long) -> Unit,
+) {
     ModalBottomSheet(
         onDismissRequest = viewModel::onDismiss,
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
@@ -80,6 +85,16 @@ fun TaskEditorSheet(state: TaskEditorUiState, viewModel: TaskEditorViewModel) {
                 keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
                 modifier = Modifier.fillMaxWidth(),
             )
+            if (!state.isDone) {
+                Row(horizontalArrangement = Arrangement.spacedBy(Spacing.s)) {
+                    TextButton(onClick = { viewModel.saveThen(onScheduleBlock) }) {
+                        Text(stringResource(R.string.editor_schedule_block))
+                    }
+                    TextButton(onClick = { viewModel.saveThen(onStartTimer) }) {
+                        Text(stringResource(R.string.editor_start_timer))
+                    }
+                }
+            }
             DeletionSection(state, onDelete = viewModel::onDeleteClicked, onMarkDone = viewModel::onMarkDone)
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(Spacing.s, Alignment.End)) {
                 TextButton(onClick = viewModel::onDismiss) { Text(stringResource(R.string.editor_cancel)) }
