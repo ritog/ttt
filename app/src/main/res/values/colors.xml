@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Only the window background lives here, so the first frame matches the Compose theme.
+  Keep in step with Background tokens in ui/theme/Color.kt.
+-->
+<resources>
+    <color name="window_background">#FFFAFAF8</color>
+</resources>

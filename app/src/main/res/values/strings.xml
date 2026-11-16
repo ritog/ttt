@@ -1,0 +1,67 @@
+<resources>
+    <!-- Display name. The package/application ID is fixed separately and never changes. -->
+    <string name="app_name">ttt</string>
+
+    <!-- Main tabs (bottom bar). "Timeblock" is a verb here; the code still calls this screen Plan. -->
+    <string name="tab_todo">Todo</string>
+    <string name="tab_plan">Timeblock</string>
+    <string name="tab_track">Track</string>
+
+    <!-- Menu (drawer) -->
+    <string name="menu_log">Log</string>
+    <string name="menu_settings">Settings</string>
+    <string name="menu_about">About</string>
+
+    <!-- Content descriptions for icon buttons -->
+    <string name="cd_open_menu">Open menu</string>
+    <string name="cd_back">Back</string>
+    <string name="cd_add_tag">Add tag</string>
+    <string name="cd_remove_tag">Remove tag %1$s</string>
+    <string name="cd_clear_filter">Clear tag filter</string>
+
+    <!-- Placeholder lines until each screen is built (M3–M5) -->
+    <string name="placeholder_plan">Your day plan will appear here.</string>
+    <string name="placeholder_track">The timer will appear here.</string>
+    <string name="placeholder_log">Your past sessions will appear here.</string>
+    <string name="placeholder_settings">Settings will appear here.</string>
+
+    <!-- Todo -->
+    <string name="todo_add_hint">Add a task…</string>
+    <string name="todo_empty">Nothing here yet. Add a task above, with #tags if you like.</string>
+    <string name="todo_filtered_empty">No open tasks with this tag.</string>
+    <string name="todo_done_header">Done (%1$d)</string>
+    <string name="todo_filter_clear">Clear</string>
+    <string name="todo_rejected_tags">Kept in the title, not valid tags: %1$s</string>
+
+    <!-- Task editor -->
+    <string name="editor_title_label">Title</string>
+    <string name="editor_tag_label">Add a tag</string>
+    <string name="editor_note_label">Note</string>
+    <string name="editor_save">Save</string>
+    <string name="editor_cancel">Cancel</string>
+    <string name="editor_delete">Delete task</string>
+    <string name="editor_mark_done">Mark done</string>
+    <string name="editor_has_sessions">This task has sessions, so it can’t be deleted.</string>
+    <string name="editor_stop_timer_first">Stop the timer first.</string>
+    <string name="delete_dialog_title">Delete this task?</string>
+    <string name="delete_dialog_no_blocks">This can’t be undone.</string>
+    <plurals name="delete_dialog_blocks">
+        <item quantity="one">Its %1$d block will be deleted too. This can’t be undone.</item>
+        <item quantity="other">Its %1$d blocks will be deleted too. This can’t be undone.</item>
+    </plurals>
+    <string name="delete_dialog_confirm">Delete</string>
+
+    <!-- Validation messages -->
+    <string name="error_title_empty">A task needs a title.</string>
+    <string name="error_title_too_long">Titles can be up to 200 characters.</string>
+    <string name="error_tag_empty">Type a tag first.</string>
+    <string name="error_tag_too_long">Tags can be up to 30 characters.</string>
+    <string name="error_tag_invalid">Tags use only a–z, 0–9, - and _.</string>
+
+    <!-- About -->
+    <string name="about_body">Time blocking, time tracking and to-do. Free and open source. No accounts, no ads, no network access.</string>
+    <string name="about_developer">Made by Ritobrata Ghosh</string>
+    <string name="about_github">github.com/ritog</string>
+    <string name="about_version">Version %1$s</string>
+    <string name="error_no_browser">No app found to open links.</string>
+</resources>
