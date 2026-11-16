@@ -23,11 +23,12 @@
     <string name="cd_add_block">Add a block</string>
     <string name="cd_decrease">Decrease %1$s</string>
     <string name="cd_increase">Increase %1$s</string>
+    <string name="cd_task_done">Done: %1$s</string>
 
 
     <!-- Todo -->
     <string name="todo_add_hint">Add a task…</string>
-    <string name="todo_empty">Nothing here yet. Add a task above, with #tags if you like.</string>
+    <string name="todo_empty">Add your first task above, with #tags if you like.</string>
     <string name="todo_filtered_empty">No open tasks with this tag.</string>
     <string name="todo_done_header">Done (%1$d)</string>
     <string name="todo_filter_clear">Clear</string>
@@ -57,7 +58,7 @@
 
     <!-- Timeblock (Plan) screen and block editor -->
     <string name="plan_today">Today</string>
-    <string name="plan_empty_day">Nothing planned. Tap + to add a block.</string>
+    <string name="plan_empty_day">Nothing planned for this day; tap + to add a block.</string>
     <string name="plan_block_worked">%1$s · %2$s worked</string>
     <string name="block_task_label">Task</string>
     <string name="block_task_hint">Search or create a task…</string>
@@ -185,5 +186,6 @@
     <string name="about_developer">Made by Ritobrata Ghosh</string>
     <string name="about_github">github.com/ritog</string>
     <string name="about_version">Version %1$s</string>
+    <string name="about_licence">Licence: GNU GPL version 3 or later</string>
     <string name="error_no_browser">No app found to open links.</string>
 </resources>

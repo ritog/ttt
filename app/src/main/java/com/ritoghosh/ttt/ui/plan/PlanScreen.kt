@@ -91,17 +91,18 @@ fun PlanScreen(
     Column(Modifier.fillMaxSize()) {
         TagFilterRow(state.tags, state.activeTag, onTagFilterClick, onClearTagFilter)
         DayHeader(state, onPreviousDay, onNextDay, onToday)
+        // Above the timeline, not on it: drawn over the grid it collided with an hour line.
+        if (state.blocks.isEmpty()) {
+            Text(
+                text = stringResource(R.string.plan_empty_day),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(horizontal = Spacing.l, vertical = Spacing.s),
+            )
+        }
         HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.outlineVariant)
         Box(Modifier.weight(1f).fillMaxWidth()) {
             DayTimeline(state, scrollState, onBlockClick, Modifier.fillMaxWidth())
-            if (state.blocks.isEmpty()) {
-                Text(
-                    text = stringResource(R.string.plan_empty_day),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.align(Alignment.TopCenter).padding(Spacing.l),
-                )
-            }
             FloatingActionButton(
                 onClick = onAddBlock,
                 elevation = FloatingActionButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp), // no shadows (SPEC 15.2)

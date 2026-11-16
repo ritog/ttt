@@ -150,6 +150,23 @@ Dated log of decisions the spec left open (date, decision, why). Newest at the b
 - **2026-11-16 — Report numbers live in Constants.kt** (top 5, 7 and 30 days, 32,000-character cells, 31-character sheet names).
 - **2026-11-16 — Core was checked here by compiling with Gradle's bundled Kotlin 2.0.21 and running all 154 JVM tests; a sample export was read back with openpyxl** (dates, times, number formats, bold header, frozen pane, autofilter all as intended). The LibreOffice and Google Sheets check is in the manual checklist.
 
+## M8 — Polish
+
+- **2026-11-16 — R8 now optimises the whole app.** The template limited it to library packages (`packageScope`); the release APK built that way crashed on start (`IllegalAccessError`: an app class extending an optimised Kotlin collection class). Without the limit it starts and works, and the APK shrank from 4.2 to 3.2 MB. No keep rules were needed: the app uses no reflection (SPEC 12), and Room and Compose ship their own rules.
+- **2026-11-16 — Release signing reads `keystore.properties`** (git-ignored) at the project root; without it `assembleRelease` makes an unsigned APK. The key is created by the author with `keytool` (README). No key is in the repository.
+- **2026-11-16 — Launcher icon: three rounded off-white bars on the accent teal**, like time blocks on a day; vector adaptive icon with a monochrome layer for themed icons. The template's bitmap mipmaps are deleted (minSdk 30 always uses the adaptive icon).
+- **2026-11-16 — Every Material colour role is mapped to our tokens.** Unset roles fell back to Material's purple baseline; the selected tab label (`secondary`) showed it.
+- **2026-11-16 — Dark tag tints softened** (saturation 0.30 → 0.22, lightness 0.24 → 0.20): whole blocks on the timeline looked heavy. Light text on them stays well above AA.
+- **2026-11-16 — Timeline hour labels grow with the font** instead of a fixed 52 dp column; at 200% "16:00" wrapped onto two lines.
+- **2026-11-16 — Task checkbox has a TalkBack label** ("Done: <title>"); it was announced as an unnamed checkbox.
+- **2026-11-16 — Empty states shortened to one sentence each** (SPEC 15.2): Todo "Add your first task above, with #tags if you like.", Timeblock "Nothing planned for this day; tap + to add a block."
+- **2026-11-16 — Timeblock's empty-day sentence sits above the timeline**, not over it (it collided with an hour line). Log with no sessions shows only "No sessions in this range.", without the empty "Time per tag" heading.
+- **2026-11-16 — Todo calls `ReportDrawnWhen { list loaded }`** (activity-compose, already a dependency), so `adb logcat` prints a "Fully drawn" time: the cold-start number used below.
+- **2026-11-16 — Performance check, with 5,000 tasks and 20,006 sessions** (`tools/make_test_db.py`), release build on the Medium Phone API 37 emulator: Todo fully drawn 1.0–1.3 s after a cold start (0.8–1.0 s with an empty database, so the data costs about 0.2 s); tab switches 0.3–0.4 s from tap to finished screen, transition included; Log range changes show in the next frame; full report export 1.2 s from Save to "Report saved." (1.1 MB file). All within the soft budget, so nothing was optimised (SPEC 12, rule 9). Re-check on a real mid-range phone before release.
+- **2026-11-16 — The large export was opened with LibreOffice headless** (converted each sheet to CSV): six sheets in order, dates, times and numbers as intended. The interactive LibreOffice and Google Sheets checks stay in the manual checklist.
+
+- **2026-11-16 — Licence: GNU GPL v3 or later (`GPL-3.0-or-later`).** Chosen by the author (SPEC 17 allowed MIT or GPL-3.0; both suit F-Droid). "Or later" is the FSF's recommended wording; it lets people also use the code under a future GPL version. Full text in `LICENSE` (identical to gnu.org's `gpl-3.0.txt`); the About screen shows a one-line licence note.
+
 ## Open questions
 
-- Licence (MIT or GPL-3.0): decide before the first release.
+None right now.

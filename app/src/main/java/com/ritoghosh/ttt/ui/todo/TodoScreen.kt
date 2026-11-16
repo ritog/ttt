@@ -9,6 +9,7 @@
  */
 package com.ritoghosh.ttt.ui.todo
 
+import androidx.activity.compose.ReportDrawnWhen
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -57,6 +58,8 @@ fun TodoRoute(
     val state by todoViewModel.uiState.collectAsStateWithLifecycle()
     val onRestoreBackup = rememberRestoreBackupLauncher(restoreService)
     val editor by editorViewModel.uiState.collectAsStateWithLifecycle()
+    // Logs "Fully drawn" once the list is loaded: the cold-start number for the M8 budget (CHANGING.md).
+    ReportDrawnWhen { state.isLoaded }
     TodoScreen(
         state = state,
         addText = todoViewModel.addText,

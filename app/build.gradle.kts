@@ -1,5 +1,7 @@
 // :app — the Android module: data and ui layers on top of :core (SPEC 4.1).
 // Kotlin is compiled by AGP's built-in Kotlin support (AGP 9+), so no kotlin-android plugin.
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -24,11 +26,29 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    // Release signing reads keystore.properties at the project root (never committed; see
+    // .gitignore and README "Release build"). Without it, assembleRelease makes an unsigned APK.
+    val keystoreFile = rootProject.file("keystore.properties")
+    val releaseSigning = if (keystoreFile.exists()) {
+        val keystore = Properties().apply { keystoreFile.inputStream().use { load(it) } }
+        signingConfigs.create("release") {
+            storeFile = rootProject.file(keystore.getProperty("storeFile"))
+            storePassword = keystore.getProperty("storePassword")
+            keyAlias = keystore.getProperty("keyAlias")
+            keyPassword = keystore.getProperty("keyPassword")
+        }
+    } else {
+        null
+    }
+
     buildTypes {
         release {
+            signingConfig = releaseSigning
+            // R8 shrinks and optimises the whole app. The template limited it to library packages
+            // (packageScope), which made the release APK crash on start with IllegalAccessError
+            // (app classes extending optimised Kotlin classes). DECISIONS.md, M8.
             optimization {
                 enable = true
-                packageScope = setOf("androidx.**", "kotlin.**", "kotlinx.**")
             }
         }
     }

@@ -65,6 +65,8 @@ app/src/main/java/com/ritoghosh/ttt/
   ui/settings/               SettingsScreen, SettingsViewModel, BackupSection, ReportSection (+ range dialog)
   ui/about/AboutScreen.kt
 app/schemas/                 Room's exported schema, one JSON per version (commit these)
+docs/screenshots/            README screenshots (demo data)
+tools/make_test_db.py        fills an empty database with test data (CHANGING.md); not part of the app
 ```
 
 The target layout is in `SPEC.md` 4.2; folders are added as milestones need them.

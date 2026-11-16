@@ -84,11 +84,16 @@ private fun TagTotalsSection(totals: List<TagTotal>) {
         modifier = Modifier.padding(horizontal = Spacing.l, vertical = Spacing.m),
         verticalArrangement = Arrangement.spacedBy(Spacing.xs),
     ) {
-        Text(stringResource(R.string.log_time_per_tag), style = MaterialTheme.typography.titleMedium)
+        // With no sessions the one-sentence empty state stands alone, without an empty heading.
         if (totals.isEmpty()) {
-            QuietText(stringResource(R.string.log_empty))
+            Text(
+                stringResource(R.string.log_empty),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
             return@Column
         }
+        Text(stringResource(R.string.log_time_per_tag), style = MaterialTheme.typography.titleMedium)
         totals.forEach { total ->
             Row(Modifier.fillMaxWidth()) {
                 Text(

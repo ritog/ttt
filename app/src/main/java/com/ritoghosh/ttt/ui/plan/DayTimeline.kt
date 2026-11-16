@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
@@ -118,7 +119,8 @@ fun minutesFromStart(instantMs: Long, dayStartMs: Long): Dp =
 
 @Composable
 private fun HourLabels(dayStartMs: Long, dayEndMs: Long, zone: ZoneId) {
-    Box(Modifier.width(HOUR_LABEL_WIDTH).fillMaxHeight()) {
+    // Grows past HOUR_LABEL_WIDTH at large font scales so "16:00" never wraps onto two lines.
+    Box(Modifier.widthIn(min = HOUR_LABEL_WIDTH).fillMaxHeight()) {
         hourMarks(dayStartMs, dayEndMs).forEach { markMs ->
             // Nudged up so the label sits centred on its line; the first one stays at the top.
             val y = (minutesFromStart(markMs, dayStartMs) - 8.dp).coerceAtLeast(0.dp)
@@ -126,7 +128,9 @@ private fun HourLabels(dayStartMs: Long, dayEndMs: Long, zone: ZoneId) {
                 text = formatTime(markMs, zone),
                 style = TimeLabelTextStyle,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.offset(y = y).padding(start = Spacing.m),
+                maxLines = 1,
+                softWrap = false,
+                modifier = Modifier.offset(y = y).padding(start = Spacing.m, end = Spacing.xs),
             )
         }
     }

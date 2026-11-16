@@ -54,6 +54,38 @@ The writer needs no change: any `ReportTable` becomes a sheet. To add a column, 
 
 Don't, unless `SPEC.md` is changed first. Mechanically: add an entry to `ui/nav/Destination.kt`, a string, and a `composable(...)` line in `AppNav.kt`.
 
+## Fill the app with test data
+
+`tools/make_test_db.py` fills an **empty** database with made-up data: `--demo` for a small realistic
+set (README screenshots), or `--tasks 5000 --sessions 20000` (the default) for the performance check.
+Use an emulator or a test phone, never your real one: it starts with clearing the app's data.
+
+```sh
+export ANDROID_SERIAL=emulator-5554          # the emulator, from `adb devices`
+adb shell pm clear com.ritoghosh.ttt         # deletes the app's data
+adb shell am start -W -n com.ritoghosh.ttt/.MainActivity && sleep 3   # Room creates the tables
+adb shell am force-stop com.ritoghosh.ttt
+mkdir -p /tmp/ttt && for f in ttt.db ttt.db-wal ttt.db-shm; do
+  adb exec-out run-as com.ritoghosh.ttt cat databases/$f > /tmp/ttt/$f; done
+python3 tools/make_test_db.py /tmp/ttt/ttt.db --demo
+adb exec-out run-as com.ritoghosh.ttt rm -f databases/ttt.db-wal databases/ttt.db-shm
+cat /tmp/ttt/ttt.db | adb shell run-as com.ritoghosh.ttt sh -c 'cat > databases/ttt.db'
+```
+
+`run-as` works only with the debug build. To measure a release build, load the data with the debug
+build first, then install the release APK over it (same signing key needed, see README).
+
+## Performance sanity check (SPEC 18, M8)
+
+1. Load `--tasks 5000 --sessions 20000` as above, then use a release build (debug builds are several times slower).
+2. Cold start: run `adb shell am start -W -n com.ritoghosh.ttt/.MainActivity` a few times after
+   `am force-stop`, and read `adb logcat | grep "Fully drawn"`: Todo reports itself drawn once its list has loaded.
+3. Screens: switch tabs and Log ranges; they should feel instant. `adb shell screenrecord` plus
+   `ffmpeg` frame times give numbers if something feels slow.
+4. Report: Settings → Export report → All time; time from Save to "Report saved.".
+
+Results from M8 (emulator, Medium Phone API 37, release build) are in `DECISIONS.md`.
+
 ## Manual test checklist
 
 Tick before each release (full list grows with each milestone).
@@ -104,3 +136,8 @@ Tick before each release (full list grows with each milestone).
 - [ ] In both: dates show as `yyyy-mm-dd` and times as `hh:mm` and sort as dates; minutes are numbers that SUM correctly; the header row is bold and stays put when scrolling; the filter arrows work.
 - [ ] Summary states the range and the generation time; "This month" and a Custom range give smaller numbers than All time; a Custom range with the end before the start cannot be exported.
 - [ ] A task note with `<`, `&`, quotes, an emoji and a line break shows unchanged in the Tasks sheet.
+- [ ] Launcher and splash show the teal three-bar icon; with themed icons on (Android 13+), it follows the wallpaper colours.
+- [ ] Empty states: a new install shows one sentence on Todo, Timeblock (a day without blocks) and Log (a range without sessions).
+- [ ] 200% font scale: Timeblock hour labels stay on one line ("16:00").
+- [ ] TalkBack on Todo: a task's checkbox is read as "Done: <title>, checkbox".
+- [ ] Release APK (signed, see README) installs, starts, and does all of the above on a real phone.

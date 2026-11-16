@@ -17,8 +17,8 @@ import androidx.compose.ui.graphics.luminance
 private const val HUE_STEPS = 360
 private const val LIGHT_SATURATION = 0.45f
 private const val LIGHT_LIGHTNESS = 0.90f
-private const val DARK_SATURATION = 0.30f
-private const val DARK_LIGHTNESS = 0.24f
+private const val DARK_SATURATION = 0.22f // M8 dark pass: 0.30 / 0.24 looked heavy on large blocks
+private const val DARK_LIGHTNESS = 0.20f
 
 /** Hue (0..359) for a tag name. String.hashCode is fixed by the Java spec, so this is stable. */
 fun tagHue(name: String): Float = Math.floorMod(name.hashCode(), HUE_STEPS).toFloat()
