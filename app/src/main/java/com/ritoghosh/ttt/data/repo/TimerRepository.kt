@@ -2,7 +2,7 @@
  * TimerRepository — the one door to the timer: applies PomodoroMachine transitions, saves sessions,
  * and keeps the alarm and the ongoing notification in step (SPEC 7, 10).
  *
- * Depends on: core/timer (PomodoroMachine), data/db, data/alarm, core/time/Clock.kt.
+ * Depends on: core/timer (PomodoroMachine), data/db, data/alarm, SettingsRepository, core/time/Clock.kt.
  * Must not: contain timer rules (they are in PomodoroMachine) or count time.
  *
  * Every event is applied in one database transaction: read state → transition → save the
@@ -15,7 +15,6 @@ import androidx.room.withTransaction
 import com.ritoghosh.ttt.core.model.TimerState
 import com.ritoghosh.ttt.core.model.TimerStatus
 import com.ritoghosh.ttt.core.timer.AlarmAction
-import com.ritoghosh.ttt.core.timer.PomodoroSettings
 import com.ritoghosh.ttt.core.timer.TimerEvent
 import com.ritoghosh.ttt.core.timer.isBreak
 import com.ritoghosh.ttt.core.timer.isInOvertime
@@ -37,14 +36,12 @@ class TimerRepository(
     private val clock: Clock,
     private val alarms: PhaseAlarmScheduler,
     private val notifications: TimerNotifications,
+    private val settingsRepository: SettingsRepository,
 ) {
     private val timerDao = database.timerStateDao()
     private val entryDao = database.entryDao()
     private val taskDao = database.taskDao()
     private val mutex = Mutex()
-
-    /** Pomodoro lengths. Fixed defaults until Settings arrive in M5. */
-    private val settings = PomodoroSettings.DEFAULT
 
     /** The timer state, kept up to date. A missing row is IDLE. */
     fun observeState(): Flow<TimerState> = timerDao.observe().map { it?.toTimerState() ?: TimerState.IDLE }
@@ -52,6 +49,8 @@ class TimerRepository(
     /** Applies [event] now and returns the new state. */
     suspend fun dispatch(event: TimerEvent): TimerState = mutex.withLock {
         val nowMs = clock.nowMs()
+        // Read for every event: a changed setting applies from the next phase on (running phases keep their length).
+        val settings = settingsRepository.pomodoroSettings()
         val result = database.withTransaction {
             val transitioned = transition(currentState(), event, nowMs, settings)
             val savedEntryId = transitioned.entryToSave?.let { entryDao.insert(it.toEntity()) }

@@ -104,6 +104,35 @@ Dated log of decisions the spec left open (date, decision, why). Newest at the b
 - **2026-11-16 — "Start timer" from a task or block selects the task on Track but does not start it** (SPEC 6.3: "opens the Track screen with that task selected").
 - **2026-11-16 — TrackViewModel is ~230 lines**, a little over the 200-line guideline; it is one screen's actions grouped by section. Split if it grows in M5.
 
+## M5 — Plan vs actual, Log, Settings
+
+- **2026-11-16 — Continued-after-block picks the nearest earlier block** (latest end, or latest end of its chain) when several qualify. Only sessions counted as *continued* extend a chain; a session inside the block does not.
+- **2026-11-16 — Worked-in-block uses integer milliseconds** (`overlap × worked ÷ wall-clock`, truncated per session). The error is under a millisecond per session; rounding to minutes happens only on screen and in the report.
+- **2026-11-16 — Timeblock: the block label shows "14:00–16:00 · 1h 35m worked"** when the block is tall enough. That is the plan-vs-actual number on screen; continued time is left for the report.
+- **2026-11-16 — Timeblock: sessions follow the tag filter too** (SPEC 6.5 names blocks; sessions are filtered the same way for consistency). A session running past midnight is drawn only up to midnight on the day it belongs to.
+- **2026-11-16 — Log: tap a session to edit its note; "Delete session" is inside that dialog and asks to confirm.** One gesture instead of swipe + menu.
+- **2026-11-16 — Log: "No tag" row** collects sessions of tasks without tags; the overlap note shows only when more than one tag is listed.
+- **2026-11-16 — Log ranges are computed when chosen** (today, this week from Monday, this month) in the current zone.
+- **2026-11-16 — Settings save on every tap (no Save button).** Numbers are clamped to their ranges (work 1–180, short 1–60, long 1–120, phases 1–12); invalid stored values read as defaults.
+- **2026-11-16 — The timer reads settings on every event**, so a change applies from the next phase; a running phase keeps the length it started with (stored in timer_state).
+- **2026-11-16 — Theme "system" is labelled "Same as the phone".** Status and navigation bar icons follow the chosen theme (`enableEdgeToEdge` with the theme's dark flag). The window background before the first frame still follows the phone (themes.xml); a brief flash on cold start with a forced theme is accepted.
+- **2026-11-16 — Todo row: "Next block … · 2h 15m worked"** (all-time worked), either part when it applies; done tasks show only the worked part.
+- **2026-11-16 — Deleting a session whose note card is still open on Track** leaves the card harmless: saving a note on a deleted session changes nothing.
+
+## M6 — Backup, restore, auto-backup
+
+- **2026-11-16 — Restore swaps the file at the next start instead of while running.** SPEC 8.3 says "replace the live database → recreate the database instance and the UI". Closing Room and replacing an open file under live ViewModels and Flows is fragile, so the checked copy is saved as `pending-restore.db` and the app restarts itself (new task + process exit); `TttApplication.onCreate` renames it over `ttt.db` before anything opens it. Same result for the user, and the live database is never half-replaced.
+- **2026-11-16 — All checks and the migration run on a private copy before anything is replaced.** A refused or failed restore leaves the app exactly as it was, and the temporary files are deleted.
+- **2026-11-16 — "Not a backup" is its own message.** A valid SQLite file without the `task` table (or with version 0) is refused as "not a ttt backup", separate from "damaged" (integrity check fails or Room cannot open it) and "could not be read". The empty-app check runs before the file picker as well as after it.
+- **2026-11-16 — Timer state is cleared by deleting the row;** a missing row reads as idle everywhere, which is the same as resetting it to IDLE.
+- **2026-11-16 — "Back up now" uses the system "Save as" picker only, no share sheet.** SPEC 8.2 allows either; the picker covers Drive, Files and USB already and needs no FileProvider. Add a share option later if wanted.
+- **2026-11-16 — Auto-backup runs from `MainActivity.onStop`** (the app has one activity, so this is "the app went to the background"), on an app-wide coroutine scope so it finishes after the screen is gone. A failure keeps the old "last auto-backup" time, so it is retried next time and the stale date shows in Settings. Opening a system picker also triggers onStop; that is harmless because of the 24-hour rule.
+- **2026-11-16 — Folder access through `DocumentsContract` directly**, not the `androidx.documentfile` library: three calls (create, list, delete) do not justify a dependency.
+- **2026-11-16 — Auto-backup deletes only files whose names match the backup pattern exactly**, oldest first by name (the name sorts by date). Files the provider renamed (for example "… (1).db") are never touched.
+- **2026-11-16 — "Keep last" range is 1–30, default 7**, shown only when a folder is chosen. "Stop auto-backup" releases the folder permission and removes the folder and last-backup settings.
+- **2026-11-16 — The "Backup restored" message is shown after the restart** (a flag set by TttApplication), because a toast shown just before the process exits may never appear.
+- **2026-11-16 — Backups use the MIME type `application/octet-stream`** so providers keep the `.db` name as given.
+
 ## Open questions
 
 - Licence (MIT or GPL-3.0): decide before the first release.

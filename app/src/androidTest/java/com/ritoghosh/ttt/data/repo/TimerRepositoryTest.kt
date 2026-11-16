@@ -124,7 +124,8 @@ class TimerRepositoryTest {
         assertEquals(TaskDeletion.TimerIsOnTask, tasks.checkDeletion(taskId))
     }
 
-    private fun newTimerRepository() = TimerRepository(database, clock, alarms, TimerNotifications(context))
+    private fun newTimerRepository() =
+        TimerRepository(database, clock, alarms, TimerNotifications(context), SettingsRepository(database))
 
     private suspend fun savedEntries() =
         EntryRepository(database).observeEntriesStartedIn(TimeRange(0L, Long.MAX_VALUE)).first()

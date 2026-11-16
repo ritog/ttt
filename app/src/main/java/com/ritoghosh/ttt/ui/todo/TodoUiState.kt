@@ -35,6 +35,8 @@ data class TodoUiState(
     val message: TodoMessage? = null,
     /** Task id → start of its next block (for the row's "Next block Sat 14:00" line). */
     val nextBlockStarts: Map<Long, Long> = emptyMap(),
+    /** Task id → all-time worked time (for the row's "2h 15m worked"). */
+    val workedByTask: Map<Long, Long> = emptyMap(),
     /** Zone for formatting those times (from the Clock). */
     val zone: ZoneId = ZoneOffset.UTC,
 )
@@ -50,6 +52,7 @@ fun buildTodoUiState(
     isDoneExpanded: Boolean,
     message: TodoMessage?,
     nextBlockStarts: Map<Long, Long> = emptyMap(),
+    workedByTask: Map<Long, Long> = emptyMap(),
     zone: ZoneId = ZoneOffset.UTC,
 ): TodoUiState {
     val activeTag = selectedTag?.takeIf { it in tags }
@@ -64,6 +67,7 @@ fun buildTodoUiState(
         isDoneExpanded = isDoneExpanded,
         message = message,
         nextBlockStarts = nextBlockStarts,
+        workedByTask = workedByTask,
         zone = zone,
     )
 }

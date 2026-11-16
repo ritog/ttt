@@ -54,6 +54,10 @@ interface TaskDao {
     @Query("SELECT COUNT(*) FROM block WHERE task_id = :taskId")
     suspend fun countBlocks(taskId: Long): Int
 
+    /** Tasks + blocks + sessions; restore is allowed only when this is 0 (SPEC 8.3). */
+    @Query("SELECT (SELECT COUNT(*) FROM task) + (SELECT COUNT(*) FROM block) + (SELECT COUNT(*) FROM entry)")
+    suspend fun countRecords(): Int
+
     /** 1 if the timer holds this task (running, paused or waiting for the next phase), else 0. */
     @Query("SELECT COUNT(*) FROM timer_state WHERE task_id = :taskId AND status != 'IDLE'")
     suspend fun countTimerOnTask(taskId: Long): Int
@@ -135,6 +139,39 @@ interface EntryDao {
     /** Entries that START inside [startMs, endMs): a session belongs to the day it starts (SPEC 4.3). */
     @Query("SELECT * FROM entry WHERE started_at >= :startMs AND started_at < :endMs ORDER BY started_at")
     fun observeStartedIn(startMs: Long, endMs: Long): Flow<List<EntryEntity>>
+
+    @Query("DELETE FROM entry WHERE id = :entryId")
+    suspend fun deleteById(entryId: Long)
+
+    /** All-time worked time per task (the Todo row's "2h 15m worked"). */
+    @Query(
+        "SELECT task_id AS taskId, SUM(ended_at - started_at - paused_ms) AS workedMs " +
+            "FROM entry GROUP BY task_id",
+    )
+    fun observeWorkedPerTask(): Flow<List<TaskWorked>>
+}
+
+/** Total worked time of one task. */
+data class TaskWorked(
+    val taskId: Long,
+    val workedMs: Long,
+)
+
+@Dao
+interface SettingDao {
+
+    @Query("SELECT * FROM setting")
+    fun observeAll(): Flow<List<SettingEntity>>
+
+    @Query("SELECT * FROM setting")
+    suspend fun getAll(): List<SettingEntity>
+
+    /** Writes one setting, replacing its old value. */
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun put(setting: SettingEntity)
+
+    @Query("DELETE FROM setting WHERE `key` = :key")
+    suspend fun delete(key: String)
 }
 
 /** The timer's single row; its id is always 1 (TIMER_STATE_ROW_ID). */

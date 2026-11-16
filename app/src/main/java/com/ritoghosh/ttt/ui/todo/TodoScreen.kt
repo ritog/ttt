@@ -1,7 +1,9 @@
 /**
- * TodoScreen — the Todo tab: add field, tag filter, open tasks, collapsible Done section (SPEC 9.1).
+ * TodoScreen — the Todo tab: add field, tag filter, open tasks, collapsible Done section (SPEC 9.1),
+ * and a "Restore a backup" link while there are no tasks at all (SPEC 8.3).
  *
- * Depends on: TodoViewModel, TaskEditorViewModel, TaskRow, TaskEditorSheet, ui/components.
+ * Depends on: TodoViewModel, TaskEditorViewModel, TaskRow, TaskEditorSheet, ui/components,
+ * data/backup/RestoreService.kt (the empty-screen restore link).
  * Must not: hold state of its own beyond what Compose needs for the snackbar; TodoRoute
  * connects the ViewModels, TodoScreen only draws what it is given.
  */
@@ -33,8 +35,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ritoghosh.ttt.R
+import com.ritoghosh.ttt.data.backup.RestoreService
+import com.ritoghosh.ttt.ui.components.RestoreBackupLink
 import com.ritoghosh.ttt.ui.components.TagFilterRow
+import com.ritoghosh.ttt.ui.components.formatDuration
 import com.ritoghosh.ttt.ui.components.formatWeekdayTime
+import com.ritoghosh.ttt.ui.components.rememberRestoreBackupLauncher
 import com.ritoghosh.ttt.ui.components.titleErrorText
 import com.ritoghosh.ttt.ui.theme.ListRowHeight
 import com.ritoghosh.ttt.ui.theme.Spacing
@@ -46,8 +52,10 @@ fun TodoRoute(
     editorViewModel: TaskEditorViewModel,
     onScheduleBlock: (Long) -> Unit,
     onStartTimer: (Long) -> Unit,
+    restoreService: RestoreService,
 ) {
     val state by todoViewModel.uiState.collectAsStateWithLifecycle()
+    val onRestoreBackup = rememberRestoreBackupLauncher(restoreService)
     val editor by editorViewModel.uiState.collectAsStateWithLifecycle()
     TodoScreen(
         state = state,
@@ -60,6 +68,7 @@ fun TodoRoute(
         onClearTagFilter = todoViewModel::onClearTagFilter,
         onToggleDoneSection = todoViewModel::onToggleDoneSection,
         onMessageShown = todoViewModel::onMessageShown,
+        onRestoreBackup = onRestoreBackup,
     )
     editor?.let {
         TaskEditorSheet(
@@ -83,6 +92,7 @@ fun TodoScreen(
     onClearTagFilter: () -> Unit,
     onToggleDoneSection: () -> Unit,
     onMessageShown: () -> Unit,
+    onRestoreBackup: () -> Unit,
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
     val messageText = state.message?.let { messageText(it) }
@@ -102,10 +112,13 @@ fun TodoScreen(
             if (emptyMessageRes != null) {
                 item(key = "empty") { QuietLine(stringResource(emptyMessageRes)) }
             }
+            if (state.isLoaded && !state.hasAnyTask) {
+                item(key = "restore") { RestoreBackupLink(onRestoreBackup, Modifier.padding(horizontal = Spacing.s)) }
+            }
             items(state.openTasks, key = { it.id }) { task ->
                 TaskRow(
                     task = task,
-                    secondaryText = nextBlockText(state, task.id),
+                    secondaryText = secondaryText(state, task.id, isOpen = true),
                     onCheckedChange = { onTaskCheckedChange(task.id, it) },
                     onClick = { onTaskClick(task.id) },
                 )
@@ -116,7 +129,12 @@ fun TodoScreen(
                 }
                 if (state.isDoneExpanded) {
                     items(state.doneTasks, key = { it.id }) { task ->
-                        TaskRow(task, null, { onTaskCheckedChange(task.id, it) }, { onTaskClick(task.id) })
+                        TaskRow(
+                            task = task,
+                            secondaryText = secondaryText(state, task.id, isOpen = false),
+                            onCheckedChange = { onTaskCheckedChange(task.id, it) },
+                            onClick = { onTaskClick(task.id) },
+                        )
                     }
                 }
             }
@@ -166,10 +184,17 @@ private fun QuietLine(text: String) {
     )
 }
 
-/** "Next block Sat 14:00" for an open task with an upcoming block, else null. */
+/** "Next block Sat 14:00 · 2h 15m worked", either part when it applies, else null (SPEC 9.1). */
 @Composable
-private fun nextBlockText(state: TodoUiState, taskId: Long): String? =
-    state.nextBlockStarts[taskId]?.let { stringResource(R.string.todo_next_block, formatWeekdayTime(it, state.zone)) }
+private fun secondaryText(state: TodoUiState, taskId: Long, isOpen: Boolean): String? {
+    val nextBlock = state.nextBlockStarts[taskId]?.takeIf { isOpen }?.let {
+        stringResource(R.string.todo_next_block, formatWeekdayTime(it, state.zone))
+    }
+    val worked = state.workedByTask[taskId]?.takeIf { it > 0 }?.let {
+        stringResource(R.string.todo_worked, formatDuration(it))
+    }
+    return listOfNotNull(nextBlock, worked).joinToString(" · ").ifEmpty { null }
+}
 
 /** The one-sentence empty state, or null when there is nothing to say (SPEC 9.1, 15.2). */
 private fun emptyTextRes(state: TodoUiState): Int? = when {

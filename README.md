@@ -8,8 +8,8 @@ Time blocking, time tracking and to-do, in one small Android app.
 
 Free and open source. No accounts, no ads, no analytics, no network access.
 
-> Status: milestone **M4**. Todo, Timeblock and Track work end to end: tasks and tags, time blocks on a day timeline,
-> and a pomodoro timer that records sessions with notes. Log and Settings are still placeholders.
+> Status: milestone **M6**. Todo, Timeblock (plan vs actual), Track (pomodoro), Log, Settings and
+> backup / restore / auto-backup work end to end. The report export (M7) comes next.
 > See `SPEC.md` section 18 for the build order.
 
 ## Screenshots

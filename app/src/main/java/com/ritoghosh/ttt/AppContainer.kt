@@ -1,7 +1,7 @@
 /**
  * AppContainer — builds and holds the app's long-lived objects; the whole wiring in one place (SPEC 4.4).
  *
- * Depends on: BuildConfig, core/time, data/db, data/repo, data/alarm.
+ * Depends on: BuildConfig, core/time, data/db, data/repo, data/alarm, data/backup.
  * Must not: use reflection or annotation-based injection, or hold any Activity or UI object
  * (only the application context, which lives as long as the process).
  *
@@ -13,8 +13,8 @@
  *   M2  database, TaskRepository (done)
  *   M3  BlockRepository (done)
  *   M4  TimerRepository, PhaseAlarmScheduler, TimerNotifications, EntryRepository (done)
- *   M5  SettingsRepository
- *   M6  BackupService, RestoreService, AutoBackup
+ *   M5  SettingsRepository (done)
+ *   M6  BackupService, RestoreService, AutoBackup (done)
  */
 package com.ritoghosh.ttt
 
@@ -23,11 +23,18 @@ import com.ritoghosh.ttt.core.time.Clock
 import com.ritoghosh.ttt.core.time.DeviceClock
 import com.ritoghosh.ttt.data.alarm.PhaseAlarmScheduler
 import com.ritoghosh.ttt.data.alarm.TimerNotifications
+import com.ritoghosh.ttt.data.backup.AutoBackup
+import com.ritoghosh.ttt.data.backup.BackupService
+import com.ritoghosh.ttt.data.backup.RestoreService
 import com.ritoghosh.ttt.data.db.AppDatabase
 import com.ritoghosh.ttt.data.repo.BlockRepository
 import com.ritoghosh.ttt.data.repo.EntryRepository
+import com.ritoghosh.ttt.data.repo.SettingsRepository
 import com.ritoghosh.ttt.data.repo.TaskRepository
 import com.ritoghosh.ttt.data.repo.TimerRepository
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 
 class AppContainer(context: Context) {
 
@@ -52,5 +59,16 @@ class AppContainer(context: Context) {
 
     val entryRepository = EntryRepository(database)
 
-    val timerRepository = TimerRepository(database, clock, alarmScheduler, notifications)
+    val settingsRepository = SettingsRepository(database)
+
+    val timerRepository = TimerRepository(database, clock, alarmScheduler, notifications, settingsRepository)
+
+    /** For work that must finish after the screen is gone (the auto-backup). Lives as long as the process. */
+    private val appScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
+    val backupService = BackupService(appContext, database, clock)
+
+    val restoreService = RestoreService(appContext, database)
+
+    val autoBackup = AutoBackup(appContext, backupService, settingsRepository, clock, appScope)
 }

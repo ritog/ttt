@@ -48,3 +48,6 @@ const val DEFAULT_WORK_PHASES_BEFORE_LONG_BREAK = 4
 
 /** Auto-backup runs when the last one is older than this (SPEC 8.4). */
 const val AUTO_BACKUP_INTERVAL_HOURS = 24
+
+/** How many auto-backups are kept in the chosen folder by default (SPEC 8.4). */
+const val DEFAULT_AUTO_BACKUP_KEEP = 7

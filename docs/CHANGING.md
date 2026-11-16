@@ -81,4 +81,17 @@ Tick before each release (full list grows with each milestone).
 - [ ] Android 14+: with exact alarms not allowed, Track shows the hint; "Allow exact alarms" opens the system page.
 - [ ] Tapping a timer notification opens the Track tab.
 - [ ] "Start timer" from the task editor and from a block opens Track with that task selected.
+- [ ] Timeblock: sessions appear as thin bars on the right; a block shows "· 1h 35m worked" when work fell inside it.
+- [ ] Log: Today / This week / This month; time per tag; sessions grouped by day with totals; a session from 23:50 to 00:15 counts on the first day.
+- [ ] Log: tap a session → edit the note → Save; Delete asks to confirm; the tag filter narrows sessions and totals.
+- [ ] Settings: − / + change pomodoro lengths (stop at their limits); a change applies to the next phase, not the running one.
+- [ ] Settings: theme Light / Dark / Same as the phone switches at once, status bar icons included.
+- [ ] Todo: a task with sessions shows "… worked" under its title.
+- [ ] Settings → Back up now → save to Downloads: "Backup saved."; the file is named `ttt-backup-YYYY-MM-DD-HHmm.db` and opens with `sqlite3` (see DATA.md).
+- [ ] Restore with data present: "Restore works on an empty app…" appears before any file picker.
+- [ ] Restore round trip: back up, clear the app's storage (Android settings → Apps → ttt → Storage), open the app → Todo shows "Restore a backup" → pick the file → the app restarts with "Backup restored." and all tasks, blocks, sessions and settings are back; the timer is idle; auto-backup is off.
+- [ ] Restore refuses a random file ("not a ttt backup") and leaves the app empty and working.
+- [ ] Auto-backup: choose a folder; leave the app (Home) → a backup appears in the folder; leave again at once → no second file (24 h rule); "Last auto-backup" shows the time.
+- [ ] Auto-backup pruning: set Keep last to 2, put three older `ttt-backup-…` files in the folder (copies with earlier dates in the name) plus an unrelated file → after the next auto-backup only the newest two backups remain and the unrelated file is untouched.
+- [ ] Stop auto-backup: the folder line says Off; the app no longer appears under the folder's access list in the Files app.
 - [ ] Report opens in LibreOffice and Google Sheets (M7).

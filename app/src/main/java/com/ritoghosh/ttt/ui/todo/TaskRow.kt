@@ -5,7 +5,7 @@
  * Must not: change data itself; it reports taps.
  *
  * Done state is shown by the checkbox and a strike-through, never by colour alone (SPEC 15.2).
- * The quiet secondary line shows "Next block Sat 14:00" now; "2h 15m worked" joins in M5.
+ * The quiet secondary line shows "Next block Sat 14:00 · 2h 15m worked" when either applies.
  */
 package com.ritoghosh.ttt.ui.todo
 

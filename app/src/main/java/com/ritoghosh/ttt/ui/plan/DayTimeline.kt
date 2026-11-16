@@ -6,7 +6,8 @@
  *
  * The only custom component in the app (SPEC 15.2). Positions are minutes since local
  * midnight times DP_PER_MINUTE, so a 23- or 25-hour daylight-saving day is simply shorter or taller.
- * The right-hand column for actual sessions joins in M5.
+ * Two columns (SPEC 9.2): left the planned blocks, right thin neutral bars for the actual
+ * sessions, so plan and actual can be compared at a glance.
  */
 package com.ritoghosh.ttt.ui.plan
 
@@ -16,6 +17,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -30,9 +32,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.ritoghosh.ttt.R
+import com.ritoghosh.ttt.ui.components.formatDuration
 import com.ritoghosh.ttt.ui.components.formatTime
 import com.ritoghosh.ttt.ui.components.formatTimeRange
 import com.ritoghosh.ttt.ui.theme.Spacing
@@ -50,6 +55,8 @@ private val BLOCK_CORNER = 6.dp
 
 /** Blocks shorter than this show only their title, not the time range. */
 private val SHOW_TIMES_MIN_HEIGHT = 44.dp
+private val SESSION_COLUMN_WIDTH = 14.dp
+private val SESSION_BAR_CORNER = 3.dp
 
 @Composable
 fun DayTimeline(
@@ -81,7 +88,28 @@ fun DayTimeline(
                 )
             }
         }
+        Spacer(Modifier.width(Spacing.xs))
+        Box(Modifier.width(SESSION_COLUMN_WIDTH).fillMaxHeight()) {
+            HourLines(state.dayStartMs, state.dayEndMs)
+            state.sessions.forEach { SessionBar(it, state) }
+        }
     }
+}
+
+/** A session as a thin bar; one that runs past midnight is cut at the end of the day it belongs to. */
+@Composable
+private fun SessionBar(session: DaySession, state: PlanUiState) {
+    val entry = session.entry
+    val endMs = minOf(entry.endedAtMs, state.dayEndMs)
+    val height = (DP_PER_MINUTE * ((endMs - entry.startedAtMs) / MS_PER_MINUTE).toInt()).coerceAtLeast(2.dp)
+    Box(
+        Modifier
+            .offset(y = minutesFromStart(entry.startedAtMs, state.dayStartMs))
+            .fillMaxWidth()
+            .height(height)
+            .clip(RoundedCornerShape(SESSION_BAR_CORNER))
+            .background(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f)),
+    )
 }
 
 /** Distance from the top of the day for an instant. */
@@ -138,7 +166,14 @@ private fun BlockBox(planned: PlannedBlock, state: PlanUiState, onClick: () -> U
             overflow = TextOverflow.Ellipsis,
         )
         if (height >= SHOW_TIMES_MIN_HEIGHT) {
-            Text(formatTimeRange(block.startMs, block.endMs, state.zone), style = TimeLabelTextStyle)
+            val range = formatTimeRange(block.startMs, block.endMs, state.zone)
+            val worked = planned.workedInBlockMs
+            val text = if (worked > 0) {
+                stringResource(R.string.plan_block_worked, range, formatDuration(worked))
+            } else {
+                range
+            }
+            Text(text, style = TimeLabelTextStyle)
         }
     }
 }

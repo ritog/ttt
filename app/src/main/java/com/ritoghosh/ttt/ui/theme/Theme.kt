@@ -4,8 +4,7 @@
  * Depends on: Color.kt, Type.kt, Spacing.kt, Compose material3.
  * Must not: use dynamic (wallpaper) colour. The app should look the same on every phone.
  *
- * The theme choice (system / light / dark) from Settings arrives in M5; until then
- * the caller passes isSystemInDarkTheme().
+ * MainActivity passes darkTheme from the Settings choice (system / light / dark).
  */
 package com.ritoghosh.ttt.ui.theme
 

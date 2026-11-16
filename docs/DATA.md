@@ -86,21 +86,48 @@ Worked time = `ended_at − started_at − paused_ms`. Indexes: started_at, task
 
 If the row is missing, the timer is idle. If phase or status hold text the app does not know (a damaged or hand-edited file), the app also treats the timer as idle rather than failing to start. Time is never stored as a running counter: elapsed time is always worked out from these timestamps, which is why the timer stays right after the app is killed or the phone sleeps.
 
-### setting — app settings (used from M5)
+### setting — app settings
 
-`key` TEXT primary key, `value` TEXT. Keys are listed in SPEC 9.5. Settings live in the database so backups include them.
+`key` TEXT primary key, `value` TEXT. Settings live in the database so backups include them. A missing key means "use the default"; a value out of range or unreadable is also treated as the default.
+
+| key | meaning | default | allowed |
+|---|---|---|---|
+| work_minutes | length of a work phase | 25 | 1–180 |
+| short_break_minutes | short break | 5 | 1–60 |
+| long_break_minutes | long break | 15 | 1–120 |
+| work_phases_before_long_break | long break after every Nth work phase | 4 | 1–12 |
+| theme | `system`, `light` or `dark` | system | |
+| auto_backup_folder_uri | folder chosen for auto-backups (a document-tree URI); absent = off | (absent) | |
+| auto_backup_keep | how many auto-backups to keep in that folder | 7 | 1–30 |
+| last_auto_backup_at | when the last auto-backup was written, epoch ms | (absent) | |
 
 ### meta — facts about this database file
 
 `key` TEXT primary key, `value` TEXT. Written once when the file is created: `created_at` (epoch ms) and `app_version_at_creation`.
 
-## Worked-time simplification
+## Plan vs actual (how sessions are matched to blocks)
 
-To be written in M5 (`EntryBlockMatcher`): pause time inside a session is spread evenly over its wall-clock window when computing time worked inside a block.
+`core/stats/EntryBlockMatcher.kt`, for each session and the blocks of the **same task**:
+
+1. **In block** — the session overlaps a block (with several, the largest overlap wins).
+2. **Continued after block** — it overlaps none, but starts at most 30 minutes after a block's end, or after the end of a session already counted as continued for that block (a chain).
+3. **Unplanned** — everything else.
+
+**Worked time inside a block** (`WorkedTime.kt`) = for each session of the block's task, `overlap(session window, block window) × (worked ÷ wall-clock length)`. This spreads a session's pauses evenly over its window: a simplification, since the real pause may have happened outside the block. All sums are in milliseconds; minutes appear only on screen and in the report.
+
+**Tag totals** count a session fully under every tag of its task, so totals can add up to more than the time worked.
 
 ## Backup format
 
-To be written in M6. Summary: a full SQLite snapshot made with `VACUUM INTO`, named `ttt-backup-YYYY-MM-DD-HHmm.db`.
+A backup is the whole database in one ordinary SQLite 3 file. Nothing is converted or compressed, so any SQLite tool on any platform can open it.
+
+- **Name:** `ttt-backup-YYYY-MM-DD-HHmm.db`, local time when it was made (for example `ttt-backup-2026-11-16-1830.db`). Auto-backup only ever deletes files that match this pattern exactly.
+- **How it is made:** `VACUUM INTO` on the live database. SQLite writes a complete, consistent copy as it is at that moment, while the app keeps running. The single `.db` file is the whole backup; no `-wal` or `-shm` files go with it.
+- **Contents:** every table above (`task`, `tag`, `task_tag`, `block`, `entry`, `timer_state`, `setting`, `meta`) plus Room's `room_master_table` (a hash Room uses to check the schema).
+- **Schema version:** `PRAGMA user_version` (1 today). A file with a higher number came from a newer app and is refused; a lower number is upgraded by the normal migrations when restored.
+- **Restore checks, in order:** the app has no tasks, blocks or sessions → the file can be read → it opens as SQLite → `PRAGMA integrity_check` says `ok` → it has a `task` table and a version of at least 1 → the version is not newer → Room opens it (running migrations and checking the schema).
+- **What restore resets:** `timer_state` is emptied (reads as idle), and `auto_backup_folder_uri` and `last_auto_backup_at` are removed, because a running timer and a folder permission belong to the old phone. Everything else, including the other settings and `meta`, is kept.
+- **How restore is installed:** the checked copy waits in the app's databases folder as `pending-restore.db`; the app restarts and, before anything opens the database, renames it over `ttt.db`. If the rename fails, the current database stays and the user still has the original backup file.
 
 ## Inspecting a backup on Linux
 

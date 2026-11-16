@@ -21,10 +21,9 @@
     <string name="cd_previous_day">Previous day</string>
     <string name="cd_next_day">Next day</string>
     <string name="cd_add_block">Add a block</string>
+    <string name="cd_decrease">Decrease %1$s</string>
+    <string name="cd_increase">Increase %1$s</string>
 
-    <!-- Placeholder lines until each screen is built (M5) -->
-    <string name="placeholder_log">Your past sessions will appear here.</string>
-    <string name="placeholder_settings">Settings will appear here.</string>
 
     <!-- Todo -->
     <string name="todo_add_hint">Add a task…</string>
@@ -34,6 +33,7 @@
     <string name="todo_filter_clear">Clear</string>
     <string name="todo_rejected_tags">Kept in the title, not valid tags: %1$s</string>
     <string name="todo_next_block">Next block %1$s</string>
+    <string name="todo_worked">%1$s worked</string>
 
     <!-- Task editor -->
     <string name="editor_title_label">Title</string>
@@ -58,6 +58,7 @@
     <!-- Timeblock (Plan) screen and block editor -->
     <string name="plan_today">Today</string>
     <string name="plan_empty_day">Nothing planned. Tap + to add a block.</string>
+    <string name="plan_block_worked">%1$s · %2$s worked</string>
     <string name="block_task_label">Task</string>
     <string name="block_task_hint">Search or create a task…</string>
     <string name="block_task_change">Change</string>
@@ -103,6 +104,49 @@
     <string name="overtime_keep_planned">Keep the planned %1$s only</string>
     <string name="stop_title">Stop this session?</string>
     <string name="stop_body">It will be saved with the time worked so far.</string>
+
+    <!-- Log -->
+    <string name="log_range_today">Today</string>
+    <string name="log_range_week">This week</string>
+    <string name="log_range_month">This month</string>
+    <string name="log_time_per_tag">Time per tag</string>
+    <string name="log_no_tag">No tag</string>
+    <string name="log_empty">No sessions in this range.</string>
+    <string name="log_tag_overlap_note">Tag totals overlap; a task with two tags counts in both.</string>
+    <string name="log_delete_session">Delete session</string>
+    <string name="log_delete_title">Delete this session?</string>
+    <string name="log_delete_body">Its time will no longer count anywhere. This can’t be undone.</string>
+
+    <!-- Settings -->
+    <string name="settings_pomodoro">Pomodoro</string>
+    <string name="settings_theme">Theme</string>
+    <string name="settings_backup">Backup</string>
+    <string name="backup_now">Back up now</string>
+    <string name="backup_restore">Restore backup</string>
+    <string name="backup_saved">Backup saved.</string>
+    <string name="backup_failed">The backup could not be saved.</string>
+    <string name="backup_auto_folder">Auto-backup folder</string>
+    <string name="backup_auto_off">Off. Choose a folder to back up once a day when you leave the app.</string>
+    <string name="backup_choose_folder">Choose folder</string>
+    <string name="backup_change_folder">Change folder</string>
+    <string name="backup_stop_auto">Stop auto-backup</string>
+    <string name="setting_auto_backup_keep">Keep last</string>
+    <string name="backup_last_never">No auto-backup yet.</string>
+    <string name="backup_last_at">Last auto-backup: %1$s</string>
+    <string name="todo_restore_link">Restore a backup</string>
+    <string name="restore_not_empty">Restore works on an empty app. To restore here, clear the app\'s storage in Android settings first.</string>
+    <string name="restore_unreadable">That file could not be read.</string>
+    <string name="restore_not_a_backup">That file is not a ttt backup.</string>
+    <string name="restore_damaged">That backup is damaged and cannot be restored.</string>
+    <string name="restore_newer_version">That backup was made by a newer version of the app. Update ttt, then try again.</string>
+    <string name="restore_done">Backup restored.</string>
+    <string name="setting_work_minutes">Work (minutes)</string>
+    <string name="setting_short_break_minutes">Short break (minutes)</string>
+    <string name="setting_long_break_minutes">Long break (minutes)</string>
+    <string name="setting_work_phases">Work phases before a long break</string>
+    <string name="theme_system">Same as the phone</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
 
     <!-- Notifications -->
     <string name="channel_alerts">Timer alerts</string>

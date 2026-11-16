@@ -17,12 +17,14 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.ritoghosh.ttt.AppContainer
-import com.ritoghosh.ttt.R
 import com.ritoghosh.ttt.ui.about.AboutScreen
-import com.ritoghosh.ttt.ui.components.EmptyState
+import com.ritoghosh.ttt.ui.log.LogRoute
+import com.ritoghosh.ttt.ui.log.LogViewModel
 import com.ritoghosh.ttt.ui.plan.BlockEditorViewModel
 import com.ritoghosh.ttt.ui.plan.PlanRoute
 import com.ritoghosh.ttt.ui.plan.PlanViewModel
+import com.ritoghosh.ttt.ui.settings.SettingsRoute
+import com.ritoghosh.ttt.ui.settings.SettingsViewModel
 import com.ritoghosh.ttt.ui.todo.TaskEditorViewModel
 import com.ritoghosh.ttt.ui.todo.TodoRoute
 import com.ritoghosh.ttt.ui.todo.TodoViewModel
@@ -49,7 +51,13 @@ fun AppNavHost(
     ) {
         composable(Destination.Todo.route) {
             val todoViewModel = viewModel {
-                TodoViewModel(container.taskRepository, container.blockRepository, container.clock, tagFilter)
+                TodoViewModel(
+                    container.taskRepository,
+                    container.blockRepository,
+                    container.entryRepository,
+                    container.clock,
+                    tagFilter,
+                )
             }
             val editorViewModel = viewModel { TaskEditorViewModel(container.taskRepository) }
             TodoRoute(
@@ -60,11 +68,18 @@ fun AppNavHost(
                     navController.navigateToTab(Destination.Plan)
                 },
                 onStartTimer = { taskId -> openTrackFor(taskId, screenRequests, navController) },
+                restoreService = container.restoreService,
             )
         }
         composable(Destination.Plan.route) {
             val planViewModel = viewModel {
-                PlanViewModel(container.blockRepository, container.taskRepository, container.clock, tagFilter)
+                PlanViewModel(
+                    container.blockRepository,
+                    container.entryRepository,
+                    container.taskRepository,
+                    container.clock,
+                    tagFilter,
+                )
             }
             val editorViewModel = viewModel {
                 BlockEditorViewModel(container.blockRepository, container.taskRepository, container.clock)
@@ -89,9 +104,20 @@ fun AppNavHost(
             }
             TrackRoute(trackViewModel, screenRequests)
         }
-        // Placeholders until each screen is built (Log/Settings M5).
-        composable(Destination.Log.route) { EmptyState(R.string.placeholder_log) }
-        composable(Destination.Settings.route) { EmptyState(R.string.placeholder_settings) }
+        composable(Destination.Log.route) {
+            val logViewModel = viewModel {
+                LogViewModel(container.entryRepository, container.taskRepository, container.clock, tagFilter)
+            }
+            LogRoute(logViewModel)
+        }
+        composable(Destination.Settings.route) {
+            SettingsRoute(
+                viewModel {
+                    SettingsViewModel(container.settingsRepository, container.backupService, container.clock)
+                },
+                container.restoreService,
+            )
+        }
         composable(Destination.About.route) { AboutScreen(container.appVersionName) }
     }
 }
